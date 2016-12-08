@@ -15,7 +15,7 @@ public interface IBasicTeamsInfo {
 	//Date - mm/yyyy format
 	ArrayList<MatchInfo> getAllMatches(String date);
 	
-	//Return all players players in that match for that team
+	//Return all players playing in that match for that team
 	ArrayList<PlayerInfo> getAllPlayers(long teamId, String matchId);
 	
 }
