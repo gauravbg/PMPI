@@ -7,10 +7,6 @@ import com.project.ai.dataclasses.TeamInfo;
 
 public interface IBasicTeamsInfo {
 
-	//Return all teams playing in that season
-	//year - yyyy format
-	ArrayList<TeamInfo> getAllTeams(String year);
-	
 	//Return all matches played in that month
 	//Date - mm/yyyy format
 	ArrayList<MatchInfo> getAllMatches(String date);

@@ -2,7 +2,13 @@ package com.project.ai.interfaces;
 
 public interface ITeamPerformance {
 
-	//numberdeducted: 1= previous year, 2= year bfr previous and so on.
-	int getTotalPointsOfPastSeasons(String currentSeasonYear, int yearDedcuted); 
+	//Number of Wins
+	int getNofWinsHistory(int rangeMin, int rangeMax, String currentYear, int howManyPrevYears);
+	
+	//Number of Draws
+	int getNofDrawsHistory(int rangeMin, int rangeMax, String currentYear, int howManyPrevYears);
+		
+	//Number of Losses
+	int getNofLossesHistory(int rangeMin, int rangeMax, String currentYear, int howManyPrevYears);	
 	 
 }
