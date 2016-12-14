@@ -24,9 +24,8 @@ import com.project.ai.dataclasses.PlayerInfo;
 import com.project.ai.dataclasses.TeamInfo;
 import com.project.ai.interfaces.IBasicTeamsInfo;
 
-public class DatabaseHelper implements IBasicTeamsInfo {
+public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsInfo {
 	
-	DBConnectionManager dbConnectionManager = new DBConnectionManager();
 	public static String EPL_COUNTRY_ID = "1729";
 
 	@Override
@@ -48,7 +47,7 @@ public class DatabaseHelper implements IBasicTeamsInfo {
 	
 	//Just for reference purpose, the following 2 methods will be removed
 	public void temporaryDatabaseFunction() {
-		Connection connection = dbConnectionManager.getConnection();
+		Connection connection = getConnection();
 		String teamApiId = "";
 		String teamName = "Manchester United";
 		String getTeamIdQuery = "SELECT team_api_id FROM Team WHERE team_long_name = ?";
@@ -70,7 +69,7 @@ public class DatabaseHelper implements IBasicTeamsInfo {
 	public void findMatchResult(String teamApiId) {
 		int thisTeamGoalCount = 0;
 		int oppositionGoalCount = 0;
-		Connection connection = dbConnectionManager.getConnection();
+		Connection connection = getConnection();
 		if(connection != null) {
 			String getGoalsQuery = "Select season, date, goal From Match where home_team_api_id = ?";
 			try {

@@ -1,6 +1,7 @@
 package com.project.ai.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.SQLiteJDBCLoader;
@@ -21,7 +22,7 @@ public class DBConnectionManager {
 		mDatabaseConnection = dataSource.getConnection();
 	}
 
-	public Connection getConnection() {
+	Connection getConnection() {
 		
 		if(mDatabaseConnection == null) {
 			try {
@@ -33,6 +34,12 @@ public class DBConnectionManager {
 			return mDatabaseConnection;
 		} else {
 			return mDatabaseConnection;
+		}
+	}
+	
+	void closeConnection() throws SQLException {
+		if(mDatabaseConnection != null) {
+			mDatabaseConnection.close();
 		}
 	}
 
