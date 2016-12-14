@@ -7,5 +7,9 @@ public class MatchInfo {
 	String homeTeamId;
 	String awayTeamId;
 	String matchId;
+	int homeTeamPoints;
+	int awayTeamPoints;
+	int noOfMatchesPlayedHometeam;
+	int noOfMatchesPlayedAwayteam;
 	
 }
