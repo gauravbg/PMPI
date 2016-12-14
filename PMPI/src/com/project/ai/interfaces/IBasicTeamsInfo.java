@@ -14,4 +14,7 @@ public interface IBasicTeamsInfo {
 	//Return all players playing in that match for that team
 	ArrayList<PlayerInfo> getAllPlayers(long teamId, String matchId);
 	
+	// Return the list of all teams
+	ArrayList<TeamInfo> getAllTeams(String year);
+	
 }
