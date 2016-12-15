@@ -184,51 +184,41 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		Connection connection = getConnection();
 		int pointsHistory = 0;
 
-		String getTotalHomePointsQuery = "Select home_team_goal, away_team_goal "
-				+ "From Match Where season = ? And home_team_api_id = ?;";
-		PreparedStatement homePreparedStatement;
+		String getTotalHomePointsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
+				+ "From Match Where season = ? And (home_team_api_id = ? or away_team_api_id = ?);";
+		PreparedStatement preparedStatement;
 		try {
-			homePreparedStatement = connection.prepareStatement(getTotalHomePointsQuery);
-			homePreparedStatement.setString(1, whichPrevSeason);
-			homePreparedStatement.setString(2, teamId);
-			ResultSet resultSet = homePreparedStatement.executeQuery();
+			preparedStatement = connection.prepareStatement(getTotalHomePointsQuery);
+			preparedStatement.setString(1, whichPrevSeason);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, teamId);
+			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
 				String homeTeamGoal = resultSet.getString("home_team_goal");
 				String awayTeamGoal = resultSet.getString("away_team_goal");
+				String homeTeamId = resultSet.getString("home_team_api_id");
+				String awayTeamId = resultSet.getString("away_team_api_id");
 				
-				if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal))
-					pointsHistory += 3;
-				else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
-					pointsHistory += 1;
+				if(homeTeamId.equalsIgnoreCase(teamId)) {
+					if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal))
+						pointsHistory += 3;
+					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
+						pointsHistory += 1;
+				}
+				
+				else if(awayTeamId.equalsIgnoreCase(teamId)) {
+					if(Integer.parseInt(homeTeamGoal) < Integer.parseInt(awayTeamGoal))
+						pointsHistory += 3;
+					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
+						pointsHistory += 1;
+				}
 
 			}
-			homePreparedStatement.close();
+			preparedStatement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		String getTotalAwayPointsQuery = "Select home_team_goal, away_team_goal "
-				+ "From Match Where season = ? And away_team_api_id = ?;";
-		PreparedStatement awayPreparedStatement;
-		try {
-			awayPreparedStatement = connection.prepareStatement(getTotalAwayPointsQuery);
-			awayPreparedStatement.setString(1, whichPrevSeason);
-			awayPreparedStatement.setString(2, teamId);
-			ResultSet resultSet = awayPreparedStatement.executeQuery();
-			while(resultSet.next()) {
-				String homeTeamGoal = resultSet.getString("home_team_goal");
-				String awayTeamGoal = resultSet.getString("away_team_goal");
-				
-				if(Integer.parseInt(homeTeamGoal) < Integer.parseInt(awayTeamGoal))
-					pointsHistory += 3;
-				else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
-					pointsHistory += 1;
-
-			}
-			awayPreparedStatement.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 		return pointsHistory;
 	}
 
