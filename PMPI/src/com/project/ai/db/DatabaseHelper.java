@@ -33,7 +33,34 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 	public ArrayList<TeamInfo> getAllTeams(String year) {
-		return null;
+		Connection connection = getConnection();
+		ArrayList<TeamInfo> allTeams = new ArrayList<>();
+
+		String getAllTeamsQuery = "Select distinct A.home_team_api_id, B.team_long_name, B.team_short_name "
+				+ "From Match as A, Team as B Where A.home_team_api_id = B.team_api_id And season = ? And league_id = ?;";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getAllTeamsQuery);
+			preparedStatement.setString(1, year);
+			preparedStatement.setString(2, EPL_LEAGUE_ID);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String teamId = resultSet.getString("home_team_api_id");
+				String teamLongName = resultSet.getString("team_long_name");
+				String teamShortName = resultSet.getString("team_short_name");
+
+				TeamInfo teamInfo = new TeamInfo();
+				teamInfo.setTeamId(teamId);
+				teamInfo.setTeamLongName(teamLongName);
+				teamInfo.setTeamShortName(teamShortName);
+
+				allTeams.add(teamInfo);
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allTeams;
 	}
 
 	//Date should be in "yyyy-MM-dd hh:mm:ss" format. Use SimpleDateFormat and pass the string
@@ -82,7 +109,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 
 	@Override
-	public ArrayList<PlayerInfo> getAllPlayers(long teamId, String matchId) {
+	public ArrayList<PlayerInfo> getAllPlayers(String teamId, String matchId) {
 		return null;
 	}
 
