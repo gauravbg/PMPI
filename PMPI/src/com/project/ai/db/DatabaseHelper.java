@@ -67,8 +67,8 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				matchInfo.setHomeTeamShortName(homeTeamNames[1]);
 
 				matchInfo.setAwayTeamId(away_team_api_id);
-				matchInfo.setAwayTeamLongName(homeTeamNames[0]);
-				matchInfo.setAwayTeamShortName(homeTeamNames[1]);
+				matchInfo.setAwayTeamLongName(awayTeamNames[0]);
+				matchInfo.setAwayTeamShortName(awayTeamNames[1]);
 
 				matchInfo.setMatchId(match_api_id);
 
@@ -82,8 +82,53 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 
 	@Override
-	public ArrayList<PlayerInfo> getAllPlayers(long teamId, String matchId) {
-		return null;
+	public ArrayList<PlayerInfo> getAllPlayers(String teamId, String matchId) {
+		Connection connection = getConnection();
+		ArrayList<PlayerInfo> allPlayers = new ArrayList<>();
+		String getHomeAndAwayTeamIdsQuery = "Select home_team_api_id, away_team_api_id, home_player_1, home_player_2, "
+				+ "home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, home_player_8, home_player_9,"
+				+ "home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, away_player_4, away_player_5,"
+				+ "away_player_6, away_player_7, away_player_8, away_player_9, away_player_10, away_player_11"
+				+ " From Match Where match_api_id = ?";
+		PreparedStatement preparedStatement;
+
+		try {
+			preparedStatement = connection.prepareStatement(getHomeAndAwayTeamIdsQuery);
+			preparedStatement.setString(1, matchId);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String home_team_api_id = resultSet.getString("home_team_api_id");
+				String away_team_api_id = resultSet.getString("away_team_api_id");
+
+				StringBuilder baseColumnName = new StringBuilder();
+				if(home_team_api_id != null && away_team_api_id != null) {
+					if(teamId.equals(home_team_api_id)) {
+						baseColumnName.append("home_player_");
+					} else if(teamId.equals(away_team_api_id)) {
+						baseColumnName.append("away_player_");
+					} else {
+						break;
+					}
+					for(int i = 1; i <= 11; i++){
+						StringBuilder column = new StringBuilder(baseColumnName);
+						String columnName = column.append(i).toString();
+						String playerId = resultSet.getString(columnName);
+						String playerName = getPlayerName(playerId);
+
+						PlayerInfo playerInfo = new PlayerInfo();
+						playerInfo.setPlayerId(playerId);
+						playerInfo.setPlayerName(playerName);
+
+						allPlayers.add(playerInfo);
+					}
+				}
+
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return allPlayers;
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
@@ -106,6 +151,12 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			e.printStackTrace();
 		}
 		return teamNames;
+	}
+
+	private String getPlayerName(String playerId) {
+		String playerName = "";
+
+		return playerName;
 	}
 
 	//Just for reference purpose, the following 2 methods will be removed

@@ -33,5 +33,7 @@ public class PMPIApp {
 	public void accessDatabaseHelper() {
 		DatabaseHelper databaseHelper = new DatabaseHelper();
 		databaseHelper.getAllMatches("2008-10-29 00:00:00");
+		
+		databaseHelper.getAllPlayers("10260", "489132");
 	}
 }
