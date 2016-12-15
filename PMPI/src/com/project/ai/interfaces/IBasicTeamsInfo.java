@@ -12,7 +12,7 @@ public interface IBasicTeamsInfo {
 	ArrayList<MatchInfo> getAllMatches(String date);
 	
 	//Return all players playing in that match for that team
-	ArrayList<PlayerInfo> getAllPlayers(long teamId, String matchId);
+	ArrayList<PlayerInfo> getAllPlayers(String teamId, String matchId);
 	
 	// Return the list of all teams
 	ArrayList<TeamInfo> getAllTeams(String year);
