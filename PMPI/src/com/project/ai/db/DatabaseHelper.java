@@ -188,6 +188,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 	
 	@Override
+	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses]> */
 	public HashMap<String, int[]> getStandingsOfPreviousSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();

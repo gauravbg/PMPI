@@ -17,7 +17,7 @@ public interface ITeamStrength {
 	//residual matches difficulty
 	ArrayList<ArrayList<Integer>> getPreviousStandingsAllOpponents(String teamId, String matchId, int howManyPrevSeasons);  
 	
-	// Get the standings, points, wins, losses, draws for a team for a particular season
+	// Get the <standings, points, wins, draws, losses> for a team for a particular season
 	HashMap<String, int[]> getStandingsOfPreviousSeason(String season);
 	
 	//Returns final total points in previous seasons by that team
