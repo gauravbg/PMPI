@@ -33,7 +33,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	public static String EPL_LEAGUE_ID = "1729";
 
 	@Override
-	public ArrayList<TeamInfo> getAllTeams(String year) {
+	public ArrayList<TeamInfo> getAllTeams(String season) {
 		Connection connection = getConnection();
 		ArrayList<TeamInfo> allTeams = new ArrayList<>();
 
@@ -42,7 +42,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = connection.prepareStatement(getAllTeamsQuery);
-			preparedStatement.setString(1, year);
+			preparedStatement.setString(1, season);
 			preparedStatement.setString(2, EPL_LEAGUE_ID);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
@@ -180,8 +180,46 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 
 	@Override
-	public int getTotalPoints(long teamId, int whichPrevSeason) {
-		return 0;
+	public int getTotalPointsHistory(String teamId, String whichPrevSeason) {
+		Connection connection = getConnection();
+		int pointsHistory = 0;
+
+		String getTotalHomePointsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
+				+ "From Match Where season = ? And (home_team_api_id = ? or away_team_api_id = ?);";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getTotalHomePointsQuery);
+			preparedStatement.setString(1, whichPrevSeason);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, teamId);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String homeTeamGoal = resultSet.getString("home_team_goal");
+				String awayTeamGoal = resultSet.getString("away_team_goal");
+				String homeTeamId = resultSet.getString("home_team_api_id");
+				String awayTeamId = resultSet.getString("away_team_api_id");
+				
+				if(homeTeamId.equalsIgnoreCase(teamId)) {
+					if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal))
+						pointsHistory += 3;
+					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
+						pointsHistory += 1;
+				}
+				
+				else if(awayTeamId.equalsIgnoreCase(teamId)) {
+					if(Integer.parseInt(homeTeamGoal) < Integer.parseInt(awayTeamGoal))
+						pointsHistory += 3;
+					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
+						pointsHistory += 1;
+				}
+
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return pointsHistory;
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
