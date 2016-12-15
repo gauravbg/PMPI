@@ -17,6 +17,6 @@ public interface ITeamStrength {
 	ArrayList<ArrayList<Integer>> getPreviousStandingsAllOponents(long teamId, String matchId, int howManyPrevSeasons);  
 	
 	//Returns final total points in previous seasons by that team.
-	int getTotalPoints(long teamId, int whichPrevSeason);
+	int getTotalPointsHistory(String teamId, String whichPrevSeason);
 	 
 }
