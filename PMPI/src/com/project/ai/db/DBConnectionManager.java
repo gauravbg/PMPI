@@ -1,6 +1,5 @@
 package com.project.ai.db;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.sqlite.SQLiteDataSource;
