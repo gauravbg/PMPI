@@ -284,10 +284,10 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			result.put( entry.getKey(), entry.getValue() );
 		}
 		
-		for (Map.Entry<String, int[]> entry : rank)
+		/* for (Map.Entry<String, int[]> entry : rank)
 		{
 			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[7] );
-		}
+		} */
 		
 		return (HashMap<String, int[]>) result;
 	}
