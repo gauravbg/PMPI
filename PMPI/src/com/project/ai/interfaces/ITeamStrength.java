@@ -4,10 +4,20 @@ import java.util.HashMap;
 
 public interface ITeamStrength {
 
+	//Number of Wins
+	int getNofWinsHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons);
+	
+	//Number of Draws
+	int getNofDrawsHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons);
+		
+	//Number of Losses
+	int getNofLossesHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons);
+	
+	
 	// residual matches difficulty
 	HashMap<String, int[]> getPreviousStandingsAllOpponents(String teamId, String matchId, int howManyPrevSeasons);
 
-	// Get the <standings, points, wins, draws, losses> for a team for a
+	// Get the <standings, points, wins, draws, losses, GF, GA, GD> for a team for a
 	// particular season
 	HashMap<String, int[]> getStandingsOfPreviousSeason(String season);
 
