@@ -397,60 +397,30 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		Connection connection = getConnection();
 		ArrayList<String> opponents = new ArrayList<>();
 		//First find future opponents of this team
-		String futureOpponentsQuery = "Select (Select home_team_api_id From Match Where away_team_api_id = ?) as home"
-				+ ", "
-				+ "(Select away_team_api_id From Match Where home_team_api_id = ?) as away "
-				+ "From Match "
-				+ "Where date > (Select date From Match Where match_api_id = ?) "
-				+ "And season = (Select season From Match Where match_api_id = ?);";
-		String awayOpponentsQuery = "Select away_team_api_id From Match Where home_team_api_id = ?"
-				+ " And date > (Select date From Match Where match_api_id = ?) "
-				+ "And season = (Select season From Match Where match_api_id = ?);"; 
-
-		String homeOpponentsQuery = "Select home_team_api_id From Match Where away_team_api_id = ?"
-				+ " And date > (Select date From Match Where match_api_id = ?) "
-				+ "And season = (Select season From Match Where match_api_id = ?);";
+		String futureOpponentsQuery = "With all_opponents as "
+				+ "(Select home_team_api_id, away_team_api_id From Match "
+				+ "Where (home_team_api_id = '10260' Or away_team_api_id = '10260') "
+				+ "And date > (Select date From Match Where match_api_id = '489132') "
+				+ "And season = (Select season From Match Where match_api_id = '489132')) "
+				+ "Select home_team_api_id as opposition From all_opponents Where away_team_api_id = '10260' Union "
+				+ "Select away_team_api_id From all_opponents Where home_team_api_id = '10260';";
+		
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = connection.prepareStatement(awayOpponentsQuery);
-			preparedStatement.setString(1, teamId);
-			preparedStatement.setString(2, matchId);
-			preparedStatement.setString(3, matchId);
+			preparedStatement = connection.prepareStatement(futureOpponentsQuery);
 			ResultSet resultSetAway = preparedStatement.executeQuery();
 			while(resultSetAway.next()) {
-				String away = resultSetAway.getString("away_team_api_id");
-				//				String season = resultSet.getString("season");
-				//				String date = resultSet.getString("date");
-				//				System.out.println("Season: " + season);
-				//				System.out.println("Date: " + date);
-
-				//				String away = resultSet.getString("away_team_api_id");
-				if(away != null) {
-					if(!opponents.contains(away))
-						opponents.add(away);
-				}
-			}
-
-			preparedStatement.clearParameters();
-			preparedStatement.close();
-
-			preparedStatement = connection.prepareStatement(homeOpponentsQuery);
-			preparedStatement.setString(1, teamId);
-			preparedStatement.setString(2, matchId);
-			preparedStatement.setString(3, matchId);
-			ResultSet resultSetHome = preparedStatement.executeQuery();
-			while(resultSetHome.next()) {
-				String home = resultSetHome.getString("home_team_api_id");
-				if(home != null) {
-					if(!opponents.contains(home))
-						opponents.add(home);
+				String opposition = resultSetAway.getString("opposition");
+				if(opposition != null) {
+					if(!opponents.contains(opposition))
+						opponents.add(opposition);
 				}
 			}
 			preparedStatement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Opponents size: " + opponents.size());
+//		System.out.println("Opponents size: " + opponents.size());
 		return opponents;
 	}
 }
