@@ -211,7 +211,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
 		int goalsScored, goalsAgainst, goalDifference;
-		
+
 		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
 				+ "From Match Where season = ? And league_id = ?;";
 		PreparedStatement preparedStatement;
@@ -230,37 +230,37 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					standings.put(homeTeamId, new int[8]);
 				if(!(standings.containsKey(awayTeamId)))
 					standings.put(awayTeamId, new int[8]);
-				
+
 				int[] homeTeamResult = standings.get(homeTeamId);
 				int[] awayTeamResult = standings.get(awayTeamId);
 
 				if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal)) {
 					homeTeamResult[2] += 1;			// win for home team
 					homeTeamResult[1] += 3;			// 3 points for home team
-					
+
 					awayTeamResult[4] += 1;			// loss for away team
 				}
 				else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal)) {
 					homeTeamResult[3] += 1;			// draw for home team
 					homeTeamResult[1] += 1;			// 1 point for home team
-					
+
 					awayTeamResult[3] += 1;			// draw for away team
 					awayTeamResult[1] += 1;			// 1 point for away team
 				}
 				else {
 					homeTeamResult[4] += 1;			// loss for home team
-					
+
 					awayTeamResult[2] += 1;			// win for away team
 					awayTeamResult[1] += 3;			// 3 points for away win
 				}
 				homeTeamResult[5] += Integer.parseInt(homeTeamGoal);	// GF
 				homeTeamResult[6] += Integer.parseInt(awayTeamGoal);	// GA
 				homeTeamResult[7] += (Integer.parseInt(homeTeamGoal) - Integer.parseInt(awayTeamGoal));
-				
+
 				awayTeamResult[5] += Integer.parseInt(awayTeamGoal);	// GF
 				awayTeamResult[6] += Integer.parseInt(homeTeamGoal);	// GA
 				awayTeamResult[7] += Integer.parseInt(awayTeamGoal) - Integer.parseInt(homeTeamGoal);
-				
+
 				standings.put(homeTeamId, homeTeamResult);
 				standings.put(awayTeamId, awayTeamResult);
 			}
@@ -301,12 +301,12 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			entry.getValue()[0] = i--;
 			result.put( entry.getKey(), entry.getValue() );
 		}
-		
+
 		/* for (Map.Entry<String, int[]> entry : rank)
 		{
 			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[7] );
 		} */
-		
+
 		return (HashMap<String, int[]>) result;
 	}
 
@@ -399,15 +399,21 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		//First find future opponents of this team
 		String futureOpponentsQuery = "With all_opponents as "
 				+ "(Select home_team_api_id, away_team_api_id From Match "
-				+ "Where (home_team_api_id = '10260' Or away_team_api_id = '10260') "
-				+ "And date > (Select date From Match Where match_api_id = '489132') "
-				+ "And season = (Select season From Match Where match_api_id = '489132')) "
-				+ "Select home_team_api_id as opposition From all_opponents Where away_team_api_id = '10260' Union "
-				+ "Select away_team_api_id From all_opponents Where home_team_api_id = '10260';";
-		
+				+ "Where (home_team_api_id = ? Or away_team_api_id = ?) "
+				+ "And date > (Select date From Match Where match_api_id = ?) "
+				+ "And season = (Select season From Match Where match_api_id = ?)) "
+				+ "Select home_team_api_id as opposition From all_opponents Where away_team_api_id = ? Union "
+				+ "Select away_team_api_id From all_opponents Where home_team_api_id = ?;";
+
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = connection.prepareStatement(futureOpponentsQuery);
+			preparedStatement.setString(1, teamId);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, matchId);
+			preparedStatement.setString(4, matchId);
+			preparedStatement.setString(5, teamId);
+			preparedStatement.setString(6, teamId);
 			ResultSet resultSetAway = preparedStatement.executeQuery();
 			while(resultSetAway.next()) {
 				String opposition = resultSetAway.getString("opposition");
@@ -420,7 +426,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-//		System.out.println("Opponents size: " + opponents.size());
+		//		System.out.println("Opponents size: " + opponents.size());
 		return opponents;
 	}
 }
