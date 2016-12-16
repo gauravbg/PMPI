@@ -36,6 +36,6 @@ public class PMPIApp {
 		databaseHelper.getAllTeams("2008/2009");
 		databaseHelper.getAllPlayers("10260", "489132");
 		databaseHelper.getTotalPointsHistory("8455", "2008/2009");
-		databaseHelper.getStandingsOfPreviousSeason("2008/2009");
+		databaseHelper.getStandingsOfPreviousSeason("2011/2012");
 	}
 }
