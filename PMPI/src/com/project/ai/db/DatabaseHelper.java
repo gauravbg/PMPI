@@ -1,34 +1,18 @@
 package com.project.ai.db;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.project.ai.dataclasses.MatchInfo;
 import com.project.ai.dataclasses.PlayerInfo;
@@ -87,12 +71,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			preparedStatement.setString(2, EPL_LEAGUE_ID);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
-				String season = resultSet.getString("season");
-				String dateResult = resultSet.getString("date");
 				String match_api_id = resultSet.getString("match_api_id");
 				String home_team_api_id = resultSet.getString("home_team_api_id");
 				String away_team_api_id = resultSet.getString("away_team_api_id");
-				String league_id = resultSet.getString("league_id");
 
 				String[] homeTeamNames = getTeamLongAndShortNames(home_team_api_id);
 				String[] awayTeamNames = getTeamLongAndShortNames(away_team_api_id);
@@ -103,8 +84,8 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				matchInfo.setHomeTeamShortName(homeTeamNames[1]);
 
 				matchInfo.setAwayTeamId(away_team_api_id);
-				matchInfo.setAwayTeamLongName(homeTeamNames[0]);
-				matchInfo.setAwayTeamShortName(homeTeamNames[1]);
+				matchInfo.setAwayTeamLongName(awayTeamNames[0]);
+				matchInfo.setAwayTeamShortName(awayTeamNames[1]);
 
 				matchInfo.setMatchId(match_api_id);
 
@@ -165,34 +146,71 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		}
 		return allPlayers;
 	}
-	
-	@Override
-	public int getNofWinsHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons) {
-		return 0;
-	}
 
 	@Override
-	public int getNofDrawsHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons) {
-		return 0;
-	}
-
-	@Override
-	public int getNofLossesHistory(int rangeMin, int rangeMax, String currentSeason, int howManyPrevSeasons) {
-		return 0;
-	}
-
-	@Override
-	public ArrayList<ArrayList<Integer>> getPreviousStandingsAllOpponents(String teamId, String matchId,
+	public HashMap<String, int[]> getPreviousStandingsAllOpponents(String teamId, String matchId,
 			int howManyPrevSeasons) {
-		return null;
+		HashMap<String, int[]> opponentsPreviousStandings = new HashMap<>();
+		ArrayList<String> opponents = getFutureOpponents(teamId, matchId);
+		//TODO: change current season later on
+		String curSeason = "2012/2013";
+		String[] currentSeasonHalves = curSeason.split("/");
+		int currentSeasonFirstHalf = Integer.valueOf(currentSeasonHalves[0]);
+		int currentSeasonSecondHalf = Integer.valueOf(currentSeasonHalves[1]);
+		if(opponents != null) {
+			for(int i = 1; i <= howManyPrevSeasons; i++) {
+				StringBuilder previousSeasonStringBuilder = new StringBuilder();
+				previousSeasonStringBuilder.append(currentSeasonFirstHalf - i);
+				previousSeasonStringBuilder.append("/");
+				previousSeasonStringBuilder.append(currentSeasonSecondHalf - i);
+				HashMap<String, int[]> previousSeasonStandings = 
+						getStandingsOfPreviousSeason(previousSeasonStringBuilder.toString());
+				for(String opponent : opponents) {
+					int[] records = previousSeasonStandings.get(opponent);
+					if(records != null) {
+						int standing = records[0];
+
+						if(opponentsPreviousStandings.containsKey(opponent)) {
+							int[] previousSeasonsStandings = opponentsPreviousStandings.get(opponent);
+							previousSeasonsStandings[i - 1] = standing;
+						} else {
+							int[] previousSeasonStanding = new int[howManyPrevSeasons];
+							previousSeasonStanding[0] = standing;
+							opponentsPreviousStandings.put(opponent, previousSeasonStanding);
+						}
+					} else {
+						//If the team was not present in a previous season, 20th position is given to it
+						if(opponentsPreviousStandings.containsKey(opponent)) {
+							int[] previousSeasonsStandings = opponentsPreviousStandings.get(opponent);
+							previousSeasonsStandings[i - 1] = 20;
+						} else {
+							int[] previousSeasonStanding = new int[howManyPrevSeasons];
+							previousSeasonStanding[0] = 20;
+							opponentsPreviousStandings.put(opponent, previousSeasonStanding);
+						}
+					}
+				}
+			}
+		}
+		/*for (Map.Entry<String, int[]> entry : opponentsPreviousStandings.entrySet()) {
+			System.out.println("-------------------------------");
+			String key = entry.getKey();
+			System.out.println("Key: " + key);
+			int[] values = entry.getValue();
+			System.out.println("Values");
+			for (int i = 0; i < howManyPrevSeasons; i++) {
+				System.out.println(i + ": " + values[i]);
+			}
+		}*/
+		return opponentsPreviousStandings;
 	}
-	
+
 	@Override
 	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses]> */
 	public HashMap<String, int[]> getStandingsOfPreviousSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
-		
+
 		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
 				+ "From Match Where season = ? And league_id = ?;";
 		PreparedStatement preparedStatement;
@@ -206,15 +224,15 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				String awayTeamGoal = resultSet.getString("away_team_goal");
 				String homeTeamId = resultSet.getString("home_team_api_id");
 				String awayTeamId = resultSet.getString("away_team_api_id");
-				
+
 				if(!(standings.containsKey(homeTeamId)))
 					standings.put(homeTeamId, new int[5]);
 				if(!(standings.containsKey(awayTeamId)))
 					standings.put(awayTeamId, new int[5]);
-				
+
 				int[] homeTeamResult = standings.get(homeTeamId);
 				int[] awayTeamResult = standings.get(awayTeamId);
-				
+
 				if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal)) {
 					homeTeamResult[2] += 1;			// win for home team
 					homeTeamResult[1] += 3;			// 3 points for home team
@@ -238,10 +256,10 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		List<Map.Entry<String, int[]>> rank =
-	            new LinkedList<Map.Entry<String, int[]>>(standings.entrySet() );
-		
+				new LinkedList<Map.Entry<String, int[]>>(standings.entrySet() );
+
 		Collections.sort( rank, new Comparator<Map.Entry<String, int[]>>()
 		{
 			@Override
@@ -257,12 +275,12 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			entry.getValue()[0] = i--;
 			result.put( entry.getKey(), entry.getValue() );
 		}
-		
+
 		for (Map.Entry<String, int[]> entry : rank)
 		{
 			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[1] );
 		}
-		
+
 		return (HashMap<String, int[]>) result;
 	}
 
@@ -285,14 +303,14 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				String awayTeamGoal = resultSet.getString("away_team_goal");
 				String homeTeamId = resultSet.getString("home_team_api_id");
 				String awayTeamId = resultSet.getString("away_team_api_id");
-				
+
 				if(homeTeamId.equalsIgnoreCase(teamId)) {
 					if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal))
 						pointsHistory += 3;
 					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
 						pointsHistory += 1;
 				}
-				
+
 				else if(awayTeamId.equalsIgnoreCase(teamId)) {
 					if(Integer.parseInt(homeTeamGoal) < Integer.parseInt(awayTeamGoal))
 						pointsHistory += 3;
@@ -305,7 +323,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return pointsHistory;
 	}
 
@@ -330,7 +348,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		}
 		return teamNames;
 	}
-	
+
 	private String getPlayerName(String playerId) {
 		Connection connection = getConnection();
 		String playerName = "";
@@ -349,114 +367,64 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return playerName;
 	}
 
-	//Just for reference purpose, the following 2 methods will be removed
-	public void temporaryDatabaseFunction() {
+	private ArrayList<String> getFutureOpponents(String teamId, String matchId) {
 		Connection connection = getConnection();
-		String teamApiId = "";
-		String teamName = "Manchester United";
-		String getTeamIdQuery = "SELECT team_api_id FROM Team WHERE team_long_name = ?";
-		PreparedStatement statement;
+		ArrayList<String> opponents = new ArrayList<>();
+		//First find future opponents of this team
+		String futureOpponentsQuery = "Select (Select home_team_api_id From Match Where away_team_api_id = ?) as home"
+				+ ", "
+				+ "(Select away_team_api_id From Match Where home_team_api_id = ?) as away "
+				+ "From Match "
+				+ "Where date > (Select date From Match Where match_api_id = ?) "
+				+ "And season = (Select season From Match Where match_api_id = ?);";
+		String awayOpponentsQuery = "Select away_team_api_id From Match Where home_team_api_id = ?"
+				+ " And date > (Select date From Match Where match_api_id = ?) "
+				+ "And season = (Select season From Match Where match_api_id = ?);"; 
+
+		String homeOpponentsQuery = "Select home_team_api_id From Match Where away_team_api_id = ?"
+				+ " And date > (Select date From Match Where match_api_id = ?) "
+				+ "And season = (Select season From Match Where match_api_id = ?);";
+		PreparedStatement preparedStatement;
 		try {
-			statement = connection.prepareStatement(getTeamIdQuery);
-			statement.setString(1, "Manchester United");
-			ResultSet resultSet = statement  
-					.executeQuery();
-			while(resultSet.next()) {
-				teamApiId = resultSet.getString("team_api_id");
+			preparedStatement = connection.prepareStatement(awayOpponentsQuery);
+			preparedStatement.setString(1, teamId);
+			preparedStatement.setString(2, matchId);
+			preparedStatement.setString(3, matchId);
+			ResultSet resultSetAway = preparedStatement.executeQuery();
+			while(resultSetAway.next()) {
+				String away = resultSetAway.getString("away_team_api_id");
+				//				String season = resultSet.getString("season");
+				//				String date = resultSet.getString("date");
+				//				System.out.println("Season: " + season);
+				//				System.out.println("Date: " + date);
+
+				//				String away = resultSet.getString("away_team_api_id");
+				if(away != null) {
+					if(!opponents.contains(away))
+						opponents.add(away);
+				}
 			}
 
-			//			String query = "SELECT sql FROM sqlite_master WHERE tbl_name = 'Match' AND type = 'table'";
-			//			PreparedStatement st = connection.prepareStatement(query);
-			//			ResultSet rs = st.executeQuery();
-			//			while(rs.next()) {
-			//				teamApiId = rs.getString("sql");
-			//			}
+			preparedStatement.clearParameters();
+			preparedStatement.close();
 
-			System.out.println("id: " + teamApiId);
-			findMatchResult(teamApiId);
-
-			resultSet.close();  
-			statement.close();
+			preparedStatement = connection.prepareStatement(homeOpponentsQuery);
+			preparedStatement.setString(1, teamId);
+			preparedStatement.setString(2, matchId);
+			preparedStatement.setString(3, matchId);
+			ResultSet resultSetHome = preparedStatement.executeQuery();
+			while(resultSetHome.next()) {
+				String home = resultSetHome.getString("home_team_api_id");
+				if(home != null) {
+					if(!opponents.contains(home))
+						opponents.add(home);
+				}
+			}
+			preparedStatement.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Opponents size: " + opponents.size());
+		return opponents;
 	}
-
-	public void findMatchResult(String teamApiId) {
-		int thisTeamGoalCount = 0;
-		int oppositionGoalCount = 0;
-		Connection connection = getConnection();
-		if(connection != null) {
-			String getGoalsQuery = "Select season, date, goal From Match where home_team_api_id = ?";
-			try {
-				PreparedStatement preparedStatement = connection.prepareStatement(getGoalsQuery);
-				preparedStatement.setString(1, teamApiId);
-				ResultSet resultSet = preparedStatement.executeQuery();
-				resultSet.next();
-				resultSet.next();
-				String goals = resultSet.getString("goal");
-				String season = resultSet.getString("season");
-				String date = resultSet.getString("date");
-
-				System.out.println("date: " + date);
-
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder dBuilder;
-				Document doc = null;
-				try {
-					dBuilder = dbFactory.newDocumentBuilder();
-					InputSource is = new InputSource();
-					is.setCharacterStream(new StringReader(goals));
-					doc = dBuilder.parse(is);
-					doc.getDocumentElement().normalize();
-
-					System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
-
-					NodeList nodeList = doc.getDocumentElement().getChildNodes();
-					for (int i = 0; i < nodeList.getLength(); i++) {
-						Node node = nodeList.item(i);
-						if(node instanceof Element) {
-							NodeList childNodes = node.getChildNodes();
-							for (int j = 0; j < childNodes.getLength(); j++) {
-								Node childNode = childNodes.item(j);
-								if(childNode instanceof Element) {
-									if(childNode.getNodeName().equals("team")) {
-										String scoredBy = childNode.getTextContent();
-										if(scoredBy != null) {
-											if( scoredBy.equals(teamApiId)) {
-												thisTeamGoalCount++;
-											} else {
-												oppositionGoalCount++;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if(thisTeamGoalCount == oppositionGoalCount) {
-						System.out.println("Draw");
-					} else if (thisTeamGoalCount > oppositionGoalCount) {
-						System.out.println("Win");
-					} else {
-						System.out.println("Lose");
-					}
-				} catch (ParserConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SAXException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
 }

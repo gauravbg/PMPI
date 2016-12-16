@@ -1,11 +1,6 @@
 package com.project.ai.main;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Scanner;
 
-import com.project.ai.db.DBConnectionManager;
 import com.project.ai.db.DatabaseHelper;
 
 public class PMPIApp {
