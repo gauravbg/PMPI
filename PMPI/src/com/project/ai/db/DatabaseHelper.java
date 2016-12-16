@@ -18,9 +18,10 @@ import com.project.ai.dataclasses.MatchInfo;
 import com.project.ai.dataclasses.PlayerInfo;
 import com.project.ai.dataclasses.TeamInfo;
 import com.project.ai.interfaces.IBasicTeamsInfo;
+import com.project.ai.interfaces.ITeamForm;
 import com.project.ai.interfaces.ITeamStrength;
 
-public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsInfo, ITeamStrength {
+public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsInfo, ITeamStrength, ITeamForm {
 
 	public static String EPL_LEAGUE_ID = "1729";
 
@@ -352,6 +353,11 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		}
 
 		return pointsHistory;
+	}
+	
+	@Override
+	public void getPlayersPlayed(String teamId, String matchId, int lastHowManyGames) {
+		
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
