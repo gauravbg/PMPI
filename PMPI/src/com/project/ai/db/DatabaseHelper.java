@@ -188,10 +188,11 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 	
 	@Override
-	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses]> */
+	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses, GF, GA, GD]> */
 	public HashMap<String, int[]> getStandingsOfPreviousSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
+		int goalsScored, goalsAgainst, goalDifference;
 		
 		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
 				+ "From Match Where season = ? And league_id = ?;";
@@ -208,9 +209,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				String awayTeamId = resultSet.getString("away_team_api_id");
 				
 				if(!(standings.containsKey(homeTeamId)))
-					standings.put(homeTeamId, new int[5]);
+					standings.put(homeTeamId, new int[8]);
 				if(!(standings.containsKey(awayTeamId)))
-					standings.put(awayTeamId, new int[5]);
+					standings.put(awayTeamId, new int[8]);
 				
 				int[] homeTeamResult = standings.get(homeTeamId);
 				int[] awayTeamResult = standings.get(awayTeamId);
@@ -218,19 +219,30 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal)) {
 					homeTeamResult[2] += 1;			// win for home team
 					homeTeamResult[1] += 3;			// 3 points for home team
+					
 					awayTeamResult[4] += 1;			// loss for away team
 				}
 				else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal)) {
 					homeTeamResult[3] += 1;			// draw for home team
 					homeTeamResult[1] += 1;			// 1 point for home team
+					
 					awayTeamResult[3] += 1;			// draw for away team
 					awayTeamResult[1] += 1;			// 1 point for away team
 				}
 				else {
 					homeTeamResult[4] += 1;			// loss for home team
+					
 					awayTeamResult[2] += 1;			// win for away team
 					awayTeamResult[1] += 3;			// 3 points for away win
 				}
+				homeTeamResult[5] += Integer.parseInt(homeTeamGoal);	// GF
+				homeTeamResult[6] += Integer.parseInt(awayTeamGoal);	// GA
+				homeTeamResult[7] += (Integer.parseInt(homeTeamGoal) - Integer.parseInt(awayTeamGoal));
+				
+				awayTeamResult[5] += Integer.parseInt(awayTeamGoal);	// GF
+				awayTeamResult[6] += Integer.parseInt(homeTeamGoal);	// GA
+				awayTeamResult[7] += Integer.parseInt(awayTeamGoal) - Integer.parseInt(homeTeamGoal);
+				
 				standings.put(homeTeamId, homeTeamResult);
 				standings.put(awayTeamId, awayTeamResult);
 			}
@@ -246,7 +258,21 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		{
 			@Override
 			public int compare(Entry<String, int[]> arg0, Entry<String, int[]> arg1) {
-				return Integer.compare(arg0.getValue()[1], arg1.getValue()[1]);
+				if(Integer.compare(arg0.getValue()[1], arg1.getValue()[1]) != 0)
+					return Integer.compare(arg0.getValue()[1], arg1.getValue()[1]);
+				// If two teams have same number of points
+				else {
+					if(Integer.compare(arg0.getValue()[7], arg1.getValue()[7]) != 0)
+						return Integer.compare(arg0.getValue()[7], arg1.getValue()[7]);
+					//teams have same goal difference
+					else {
+						if(Integer.compare(arg0.getValue()[5], arg1.getValue()[5]) != 0)
+							return Integer.compare(arg0.getValue()[5], arg1.getValue()[5]);
+						//if same number of goals scored, return alphabetically
+						else
+							return Integer.compare(Integer.parseInt(arg0.getKey()), Integer.parseInt(arg1.getKey()));
+					}
+				}
 			}
 		} );
 
@@ -260,7 +286,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		
 		for (Map.Entry<String, int[]> entry : rank)
 		{
-			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[1] );
+			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[7] );
 		}
 		
 		return (HashMap<String, int[]>) result;
