@@ -5,6 +5,7 @@ import java.util.HashMap;
 public interface ITeamStrength {
 	
 	// residual matches difficulty
+	// Returns <teamId, [previousstandings 1 to howManyPrevSeasons]>
 	HashMap<String, int[]> getPreviousStandingsAllOpponents(String teamId, String matchId, int howManyPrevSeasons);
 
 	// Get the <standings, points, wins, draws, losses, GF, GA, GD> for a team for a

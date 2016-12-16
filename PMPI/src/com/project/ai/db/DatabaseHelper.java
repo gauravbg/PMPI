@@ -147,6 +147,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return allPlayers;
 	}
 
+	// Returns <teamId, [previousstandings 1 to howManyPrevSeasons]>
 	@Override
 	public HashMap<String, int[]> getPreviousStandingsAllOpponents(String teamId, String matchId,
 			int howManyPrevSeasons) {
