@@ -164,7 +164,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				previousSeasonStringBuilder.append("/");
 				previousSeasonStringBuilder.append(currentSeasonSecondHalf - i);
 				HashMap<String, int[]> previousSeasonStandings = 
-						getStandingsOfPreviousSeason(previousSeasonStringBuilder.toString());
+						getStandingsOfSeason(previousSeasonStringBuilder.toString());
 				for(String opponent : opponents) {
 					int[] records = previousSeasonStandings.get(opponent);
 					if(records != null) {
@@ -207,7 +207,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses, GF, GA, GD]> */
-	public HashMap<String, int[]> getStandingsOfPreviousSeason(String season) {
+	public HashMap<String, int[]> getStandingsOfSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
 		int goalsScored, goalsAgainst, goalDifference;
