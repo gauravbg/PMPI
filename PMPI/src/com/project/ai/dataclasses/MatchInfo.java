@@ -53,6 +53,4 @@ public class MatchInfo {
 		this.awayTeamShortName = awayTeamShortName;
 	}
 
-
-
 }
