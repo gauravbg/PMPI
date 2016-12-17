@@ -1,8 +1,12 @@
 package com.project.ai.interfaces;
 
+import java.util.ArrayList;
+
+import com.project.ai.dataclasses.PlayerInfo;
+
 public interface ITeamForm {
 	
-	// Get players who played in the lastHowManyGames
-	void getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames);
+	// Get players who played in the inLastHowManyGames
+	ArrayList<PlayerInfo> getListOfPlayersPlayed(String teamId, String matchId, int inLastHowManyGames);
 
 }
