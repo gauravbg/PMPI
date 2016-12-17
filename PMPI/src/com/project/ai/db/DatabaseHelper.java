@@ -209,8 +209,8 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return opponentsPreviousStandings;
 	}
 
-	@Override
 	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses, GF, GA, GD]> */
+	@Override
 	public HashMap<String, int[]> getStandingsOfSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
@@ -314,6 +314,112 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return (HashMap<String, int[]>) result;
 	}
 
+	/* Returns a HashMap of the form <TeamId, [Standings, Points, Wins, Draws, Losses, GF, GA, GD]> */
+	@Override
+	public HashMap<String, int[]> getStandingsOfSeasonForGameWeek(String season, String gameWeek) {
+		Connection connection = getConnection();
+		HashMap<String, int[]> standings = new HashMap<>();
+		int goalsScored, goalsAgainst, goalDifference;
+
+		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
+				+ "From Match Where season = ? And league_id = ? And stage < ?;";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getStandingsQuery);
+			preparedStatement.setString(1, season);
+			preparedStatement.setString(2, EPL_LEAGUE_ID);
+			preparedStatement.setString(3, gameWeek);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String homeTeamGoal = resultSet.getString("home_team_goal");
+				String awayTeamGoal = resultSet.getString("away_team_goal");
+				String homeTeamId = resultSet.getString("home_team_api_id");
+				String awayTeamId = resultSet.getString("away_team_api_id");
+
+				if(!(standings.containsKey(homeTeamId)))
+					standings.put(homeTeamId, new int[8]);
+				if(!(standings.containsKey(awayTeamId)))
+					standings.put(awayTeamId, new int[8]);
+
+				int[] homeTeamResult = standings.get(homeTeamId);
+				int[] awayTeamResult = standings.get(awayTeamId);
+
+				if(Integer.parseInt(homeTeamGoal) > Integer.parseInt(awayTeamGoal)) {
+					homeTeamResult[2] += 1;			// win for home team
+					homeTeamResult[1] += 3;			// 3 points for home team
+
+					awayTeamResult[4] += 1;			// loss for away team
+				}
+				else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal)) {
+					homeTeamResult[3] += 1;			// draw for home team
+					homeTeamResult[1] += 1;			// 1 point for home team
+
+					awayTeamResult[3] += 1;			// draw for away team
+					awayTeamResult[1] += 1;			// 1 point for away team
+				}
+				else {
+					homeTeamResult[4] += 1;			// loss for home team
+
+					awayTeamResult[2] += 1;			// win for away team
+					awayTeamResult[1] += 3;			// 3 points for away win
+				}
+				homeTeamResult[5] += Integer.parseInt(homeTeamGoal);	// GF
+				homeTeamResult[6] += Integer.parseInt(awayTeamGoal);	// GA
+				homeTeamResult[7] += (Integer.parseInt(homeTeamGoal) - Integer.parseInt(awayTeamGoal));
+
+				awayTeamResult[5] += Integer.parseInt(awayTeamGoal);	// GF
+				awayTeamResult[6] += Integer.parseInt(homeTeamGoal);	// GA
+				awayTeamResult[7] += Integer.parseInt(awayTeamGoal) - Integer.parseInt(homeTeamGoal);
+
+				standings.put(homeTeamId, homeTeamResult);
+				standings.put(awayTeamId, awayTeamResult);
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		List<Map.Entry<String, int[]>> rank =
+				new LinkedList<Map.Entry<String, int[]>>(standings.entrySet() );
+
+		Collections.sort( rank, new Comparator<Map.Entry<String, int[]>>()
+		{
+			@Override
+			public int compare(Entry<String, int[]> arg0, Entry<String, int[]> arg1) {
+				if(Integer.compare(arg0.getValue()[1], arg1.getValue()[1]) != 0)
+					return Integer.compare(arg0.getValue()[1], arg1.getValue()[1]);
+				// If two teams have same number of points
+				else {
+					if(Integer.compare(arg0.getValue()[7], arg1.getValue()[7]) != 0)
+						return Integer.compare(arg0.getValue()[7], arg1.getValue()[7]);
+					//teams have same goal difference
+					else {
+						if(Integer.compare(arg0.getValue()[5], arg1.getValue()[5]) != 0)
+							return Integer.compare(arg0.getValue()[5], arg1.getValue()[5]);
+						//if same number of goals scored, return alphabetically
+						else
+							return Integer.compare(Integer.parseInt(arg0.getKey()), Integer.parseInt(arg1.getKey()));
+					}
+				}
+			}
+		} );
+
+		Map<String, int[]> result = new LinkedHashMap<String, int[]>();
+		int i = 20;
+		for (Map.Entry<String, int[]> entry : rank)
+		{
+			entry.getValue()[0] = i--;
+			result.put( entry.getKey(), entry.getValue() );
+		}
+
+		for (Map.Entry<String, int[]> entry : rank)
+		{
+			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[1] );
+		} 
+
+		return (HashMap<String, int[]>) result;
+	}
+
 	@Override
 	public int getTotalPointsHistory(String teamId, String whichPrevSeason) {
 		Connection connection = getConnection();
@@ -360,7 +466,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	public void getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
 		Connection connection = getConnection();
-		HashMap<String, ArrayList<PlayerInfo>> playersPlayedMap = new HashMap<>();
+		ArrayList<PlayerInfo> playersPlayedRecently = new  ArrayList<>();
 		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
 				+ "home_player_1, home_player_2, home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, "
 				+ "home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, "
@@ -381,8 +487,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				String home_team_api_id = resultSet.getString("home_team_api_id");
 				String away_team_api_id = resultSet.getString("away_team_api_id");
 
-				ArrayList<PlayerInfo> playersPlayedList = new ArrayList<>();
-
 				StringBuilder baseColumnName = new StringBuilder();
 				if(home_team_api_id != null && away_team_api_id != null) {
 					if(teamId.equals(home_team_api_id)) {
@@ -402,26 +506,19 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						playerInfo.setPlayerId(playerId);
 						playerInfo.setPlayerName(playerName);
 
-						playersPlayedList.add(playerInfo);
+						for(PlayerInfo player : playersPlayedRecently) {
+							if(!player.getPlayerId().equals(playerInfo.getPlayerId())) {
+								playersPlayedRecently.add(playerInfo);
+							}
+						}
 					}
-					playersPlayedMap.put(match_id, playersPlayedList);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Map size: " + playersPlayedMap.size());
-		for (Map.Entry<String, ArrayList<PlayerInfo>> entry : playersPlayedMap.entrySet()) {
-			System.out.println("-------------------------------");
-			String key = entry.getKey();
-			System.out.println("Key: " + key);
-			ArrayList<PlayerInfo> values = entry.getValue();
-			System.out.println("Values");
-			for (PlayerInfo value : values) {
-				System.out.println("Player: " + value.getPlayerName());
-			}
-		}
-		}
+		System.out.println("Map size: " + playersPlayedRecently.size());
+	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
 		String[] teamNames = new String[2];
