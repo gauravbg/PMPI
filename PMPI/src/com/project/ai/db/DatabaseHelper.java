@@ -464,7 +464,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 
-	public void getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
+	public ArrayList<PlayerInfo> getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
 		Connection connection = getConnection();
 		ArrayList<PlayerInfo> playersPlayedRecently = new  ArrayList<>();
 		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
@@ -506,8 +506,16 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						playerInfo.setPlayerId(playerId);
 						playerInfo.setPlayerName(playerName);
 
-						for(PlayerInfo player : playersPlayedRecently) {
-							if(!player.getPlayerId().equals(playerInfo.getPlayerId())) {
+						boolean isPresent = false;
+						if(playersPlayedRecently.isEmpty()) {
+							playersPlayedRecently.add(playerInfo);
+						} else {
+							for(PlayerInfo player : playersPlayedRecently) {
+								if(player.getPlayerId().equals(playerInfo.getPlayerId())) {
+									isPresent = true;
+								}
+							}
+							if(!isPresent) {
 								playersPlayedRecently.add(playerInfo);
 							}
 						}
@@ -517,7 +525,10 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Map size: " + playersPlayedRecently.size());
+		//		for(PlayerInfo player : playersPlayedRecently) {
+		//			System.out.println(player.getPlayerName());
+		//		}
+		return playersPlayedRecently;
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
