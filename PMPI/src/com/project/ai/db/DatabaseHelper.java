@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,19 +58,19 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return allTeams;
 	}
 
-	//Date should be in "yyyy-MM-dd hh:mm:ss" format. Use SimpleDateFormat and pass the string
 	@Override
-	public ArrayList<MatchInfo> getAllMatches(String date) {
+	public ArrayList<MatchInfo> getAllMatches(String season, String gameWeek) {
 		Connection connection = getConnection();
 		ArrayList<MatchInfo> allMatches = new ArrayList<>();
 
 		String getAllMatchesOnThisDayQuery = "Select season, date, match_api_id, home_team_api_id, away_team_api_id, league_id "
-				+ "From Match Where date = ? And league_id = ?;";
+				+ "From Match Where season = ? And league_id = ? And stage = ?;";
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = connection.prepareStatement(getAllMatchesOnThisDayQuery);
-			preparedStatement.setString(1, date);
+			preparedStatement.setString(1, season);
 			preparedStatement.setString(2, EPL_LEAGUE_ID);
+			preparedStatement.setString(3, gameWeek);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
 				String match_api_id = resultSet.getString("match_api_id");
@@ -96,6 +97,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		System.out.println("All matches size: " + allMatches.size());
 		return allMatches;
 	}
 
@@ -345,7 +347,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					else if(Integer.parseInt(homeTeamGoal) == Integer.parseInt(awayTeamGoal))
 						pointsHistory += 1;
 				}
-
 			}
 			preparedStatement.close();
 		} catch (SQLException e) {
@@ -354,11 +355,73 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 		return pointsHistory;
 	}
-	
+
 	@Override
-	public void getListOfPlayers(String teamId, String matchId, int lastHowManyGames) {
-		
-	}
+
+	public void getPlayersPlayed(String teamId, String matchId, int lastHowManyGames) {
+		Connection connection = getConnection();
+		HashMap<String, ArrayList<PlayerInfo>> playersPlayedMap = new HashMap<>();
+		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
+				+ "home_player_1, home_player_2, home_player_3, home_player_4, home_player_5, home_player_6, home_player_7, "
+				+ "home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, "
+				+ "away_player_4, away_player_5, away_player_6, away_player_7, away_player_8, away_player_9, away_player_10, "
+				+ "away_player_11 From Match Where date < (Select date from Match Where match_api_id = ?)"
+				+ "And (home_team_api_id = ? Or away_team_api_id = ?) "
+				+ "Order By date DESC Limit ?;";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getPlayersInLastFewMatchesQuery);
+			preparedStatement.setString(1, matchId);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, teamId);
+			preparedStatement.setString(4, String.valueOf(lastHowManyGames));
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String match_id = resultSet.getString("match_api_id");
+				String home_team_api_id = resultSet.getString("home_team_api_id");
+				String away_team_api_id = resultSet.getString("away_team_api_id");
+
+				ArrayList<PlayerInfo> playersPlayedList = new ArrayList<>();
+
+				StringBuilder baseColumnName = new StringBuilder();
+				if(home_team_api_id != null && away_team_api_id != null) {
+					if(teamId.equals(home_team_api_id)) {
+						baseColumnName.append("home_player_");
+					} else if(teamId.equals(away_team_api_id)) {
+						baseColumnName.append("away_player_");
+					} else {
+						break;
+					}
+					for(int i = 1; i <= 11; i++){
+						StringBuilder column = new StringBuilder(baseColumnName);
+						String columnName = column.append(i).toString();
+						String playerId = resultSet.getString(columnName);
+						String playerName = getPlayerName(playerId);
+
+						PlayerInfo playerInfo = new PlayerInfo();
+						playerInfo.setPlayerId(playerId);
+						playerInfo.setPlayerName(playerName);
+
+						playersPlayedList.add(playerInfo);
+					}
+					playersPlayedMap.put(match_id, playersPlayedList);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		/*System.out.println("Map size: " + playersPlayedMap.size());
+		for (Map.Entry<String, ArrayList<PlayerInfo>> entry : playersPlayedMap.entrySet()) {
+			System.out.println("-------------------------------");
+			String key = entry.getKey();
+			System.out.println("Key: " + key);
+			ArrayList<PlayerInfo> values = entry.getValue();
+			System.out.println("Values");
+			for (PlayerInfo value : values) {
+				System.out.println("Player: " + value.getPlayerName());
+			}
+		}*/
+		}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
 		String[] teamNames = new String[2];
