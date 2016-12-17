@@ -464,7 +464,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 
-	public ArrayList<PlayerInfo> getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
+	public ArrayList<PlayerInfo> getListOfPlayersPlayed(String teamId, String matchId, int inLastHowManyGames) {
 		Connection connection = getConnection();
 		ArrayList<PlayerInfo> playersPlayedRecently = new  ArrayList<>();
 		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
