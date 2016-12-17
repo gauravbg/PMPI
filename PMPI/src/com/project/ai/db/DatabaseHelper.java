@@ -480,7 +480,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			preparedStatement.setString(1, matchId);
 			preparedStatement.setString(2, teamId);
 			preparedStatement.setString(3, teamId);
-			preparedStatement.setString(4, String.valueOf(inHowManyGames));
+			preparedStatement.setString(4, String.valueOf(inLastHowManyGames));
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
 				String match_id = resultSet.getString("match_api_id");
