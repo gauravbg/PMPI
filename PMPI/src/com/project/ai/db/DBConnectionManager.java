@@ -16,7 +16,7 @@ public class DBConnectionManager {
 		boolean initialize = SQLiteJDBCLoader.initialize();
 
 		SQLiteDataSource dataSource = new SQLiteDataSource();
-		dataSource.setUrl("jdbc:sqlite:C://school/ai/PMPI/database.sqlite/database.sqlite");
+		dataSource.setUrl("jdbc:sqlite:C:\\Users\\Nipun\\Desktop\\MS\\Sem 1\\Artificial Intelligence\\Project\\PMPI\\PMPI\\soccer\\database.sqlite");
 
 		mDatabaseConnection = dataSource.getConnection();
 	}
