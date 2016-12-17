@@ -21,18 +21,5 @@ public class PMPIApp {
 
 		in.close();
 
-		PMPIApp pmpiApp = new PMPIApp();
-		pmpiApp.accessDatabaseHelper();
-	}
-
-	public void accessDatabaseHelper() {
-		DatabaseHelper databaseHelper = new DatabaseHelper();
-		//		databaseHelper.getAllMatchesInGameweek("2010/2011", "10");
-		//		databaseHelper.getAllTeams("2008/2009");
-		//		databaseHelper.getAllPlayers("10260", "489132");
-		//		databaseHelper.getTotalPointsHistory("8455", "2008/2009");
-		//		databaseHelper.getStandingsOfSeason("2011/2012");
-		//		databaseHelper.getPreviousStandingsAllOpponents("10260", "489132", 2);
-		databaseHelper.getListOfPlayersPlayed("10260", "489132", 5);
 	}
 }
