@@ -59,7 +59,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 
 	@Override
-	public ArrayList<MatchInfo> getAllMatches(String season, String gameWeek) {
+	public ArrayList<MatchInfo> getAllMatchesInGameweek(String season, String gameWeek) {
 		Connection connection = getConnection();
 		ArrayList<MatchInfo> allMatches = new ArrayList<>();
 
@@ -358,7 +358,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 
-	public void getPlayersPlayed(String teamId, String matchId, int lastHowManyGames) {
+	public void getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
 		Connection connection = getConnection();
 		HashMap<String, ArrayList<PlayerInfo>> playersPlayedMap = new HashMap<>();
 		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
@@ -374,7 +374,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			preparedStatement.setString(1, matchId);
 			preparedStatement.setString(2, teamId);
 			preparedStatement.setString(3, teamId);
-			preparedStatement.setString(4, String.valueOf(lastHowManyGames));
+			preparedStatement.setString(4, String.valueOf(inHowManyGames));
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
 				String match_id = resultSet.getString("match_api_id");
@@ -410,7 +410,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		/*System.out.println("Map size: " + playersPlayedMap.size());
+		System.out.println("Map size: " + playersPlayedMap.size());
 		for (Map.Entry<String, ArrayList<PlayerInfo>> entry : playersPlayedMap.entrySet()) {
 			System.out.println("-------------------------------");
 			String key = entry.getKey();
@@ -420,7 +420,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			for (PlayerInfo value : values) {
 				System.out.println("Player: " + value.getPlayerName());
 			}
-		}*/
+		}
 		}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {

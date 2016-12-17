@@ -27,12 +27,12 @@ public class PMPIApp {
 
 	public void accessDatabaseHelper() {
 		DatabaseHelper databaseHelper = new DatabaseHelper();
-				databaseHelper.getAllMatches("2010/2011", "10");
+		//		databaseHelper.getAllMatchesInGameweek("2010/2011", "10");
 		//		databaseHelper.getAllTeams("2008/2009");
 		//		databaseHelper.getAllPlayers("10260", "489132");
 		//		databaseHelper.getTotalPointsHistory("8455", "2008/2009");
 		//		databaseHelper.getStandingsOfSeason("2011/2012");
 		//		databaseHelper.getPreviousStandingsAllOpponents("10260", "489132", 2);
-//		databaseHelper.getPlayersPlayed("10260", "489132", 5);
+		databaseHelper.getListOfPlayersPlayed("10260", "489132", 5);
 	}
 }

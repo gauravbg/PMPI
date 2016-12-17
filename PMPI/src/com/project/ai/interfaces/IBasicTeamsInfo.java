@@ -8,7 +8,7 @@ import com.project.ai.dataclasses.TeamInfo;
 public interface IBasicTeamsInfo {
 
 	//Return all matches played in that gameweek
-	ArrayList<MatchInfo> getAllMatches(String season, String gameWeek);
+	ArrayList<MatchInfo> getAllMatchesInGameweek(String season, String gameWeek);
 	
 	//Return all players playing in that match for that team
 	ArrayList<PlayerInfo> getAllPlayers(String teamId, String matchId);
