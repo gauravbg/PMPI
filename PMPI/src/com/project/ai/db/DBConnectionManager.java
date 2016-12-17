@@ -10,15 +10,19 @@ import org.sqlite.SQLiteJDBCLoader;
 public class DBConnectionManager {
 
 	private static Connection mDatabaseConnection = null;
-	
+	private String dbPath = "";
 	private void setConnection() throws Exception{
 
 		boolean initialize = SQLiteJDBCLoader.initialize();
 
 		SQLiteDataSource dataSource = new SQLiteDataSource();
-		dataSource.setUrl("jdbc:sqlite:C:\\Users\\Nipun\\Desktop\\MS\\Sem 1\\Artificial Intelligence\\Project\\PMPI\\PMPI\\soccer\\database.sqlite");
+		dataSource.setUrl("jdbc:sqlite:"+dbPath);
 
 		mDatabaseConnection = dataSource.getConnection();
+	}
+	
+	public void setDatabasePath(String path) {
+		dbPath = path;
 	}
 
 	Connection getConnection() {
@@ -28,6 +32,7 @@ public class DBConnectionManager {
 				setConnection();
 			} catch (Exception e) {
 				System.out.println("Failed to create connection to Database!");
+				System.out.println("Path to database file must be set using command line argument!");
 				e.printStackTrace();
 			}
 			return mDatabaseConnection;
