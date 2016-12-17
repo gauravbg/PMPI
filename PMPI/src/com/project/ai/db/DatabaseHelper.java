@@ -357,6 +357,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 
 	@Override
+
 	public void getPlayersPlayed(String teamId, String matchId, int lastHowManyGames) {
 		Connection connection = getConnection();
 		HashMap<String, ArrayList<PlayerInfo>> playersPlayedMap = new HashMap<>();
@@ -420,7 +421,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				System.out.println("Player: " + value.getPlayerName());
 			}
 		}*/
-	}
+		}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
 		String[] teamNames = new String[2];
