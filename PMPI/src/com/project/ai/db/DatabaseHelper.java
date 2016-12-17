@@ -356,7 +356,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	}
 	
 	@Override
-	public void getPlayersPlayed(String teamId, String matchId, int lastHowManyGames) {
+	public void getListOfPlayers(String teamId, String matchId, int lastHowManyGames) {
 		
 	}
 
