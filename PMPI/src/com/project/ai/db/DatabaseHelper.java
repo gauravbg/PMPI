@@ -529,6 +529,47 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		//			System.out.println(player.getPlayerName());
 		//		}
 		return playersPlayedRecently;
+}
+	
+	
+	public HashMap<String, Integer> getRatingsOfPlayers(ArrayList<PlayerInfo> playerIds, String matchId) {
+		Connection connection = getConnection();
+		HashMap<String, Integer> playersRankingMap = new HashMap<>();
+		
+		for(PlayerInfo player : playerIds) {
+			String playerId = player.getPlayerId();
+			
+			String getRankingOfPlayersQuery = "Select overall_rating, P.date "
+					+ "From Player_Attributes as P Where player_api_id = ?"
+					+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
+					+ "Order By P.date Desc Limit 1;";
+			PreparedStatement preparedStatement;
+			try {
+				preparedStatement = connection.prepareStatement(getRankingOfPlayersQuery);
+				preparedStatement.setString(1, playerId);
+				preparedStatement.setString(2, matchId);
+				
+				ResultSet resultSet = preparedStatement.executeQuery();
+				while(resultSet.next()) {
+					String overallRating = resultSet.getString("overall_rating");
+					playersRankingMap.put(playerId, Integer.parseInt(overallRating));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Player Rating map size: " + playersRankingMap.size());
+		for (Map.Entry<String, Integer> entry : playersRankingMap.entrySet()) {
+			System.out.println("-------------------------------");
+			String key = entry.getKey();
+			System.out.println("Key: " + key);
+			int values = entry.getValue();
+			System.out.println("Values: " + values);
+		}
+		
+		return playersRankingMap;
+		
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
