@@ -10,6 +10,8 @@ public class TestMatchResultsInfo {
 	String homeTeamGoals;
 	String awayTeamGoals;
 	ArrayList<String> listOfInfluentialPlayers;
+	double winProbabalityForHomeTeam;
+	double winProbabalityForAwayTeam;
 	
 	public String getMatchId() {
 		return matchId;
@@ -47,5 +49,16 @@ public class TestMatchResultsInfo {
 	public void setListOfInfluentialPlayers(ArrayList<String> listOfInfluentialPlayers) {
 		this.listOfInfluentialPlayers = listOfInfluentialPlayers;
 	}
-
+	public double getWinProbabalityForHomeTeam() {
+		return winProbabalityForHomeTeam;
+	}
+	public void setWinProbabalityForHomeTeam(double winProbabalityForHomeTeam) {
+		this.winProbabalityForHomeTeam = winProbabalityForHomeTeam;
+	}
+	public double getWinProbabalityForAwayTeam() {
+		return winProbabalityForAwayTeam;
+	}
+	public void setWinProbabalityForAwayTeam(double winProbabalityForAwayTeam) {
+		this.winProbabalityForAwayTeam = winProbabalityForAwayTeam;
+	}
 }

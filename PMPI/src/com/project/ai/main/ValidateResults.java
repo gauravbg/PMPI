@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.project.ai.dataclasses.MatchInfo;
 import com.project.ai.dataclasses.TestMatchResultsInfo;
 import com.project.ai.db.DBConnectionManager;
 
@@ -29,7 +30,7 @@ public class ValidateResults extends DBConnectionManager {
 		super();
 	}
 
-	public static int PREDICTION_FOR_HOW_MANY_MATCHES = 5;
+	public static int PREDICTION_FOR_HOW_MANY_PLAYERS = 5;
 	public static String EPL_LEAGUE_ID = "1729";
 
 	/**
@@ -125,11 +126,11 @@ public class ValidateResults extends DBConnectionManager {
 		testMatchResults.setListOfInfluentialPlayers(influentialPlayer);
 	}
 
-	public HashMap<String, TestMatchResultsInfo> validateResults (String gameweek, String season) {
-		HashMap<String, TestMatchResultsInfo> getActualResults = new HashMap<>();
-		getActualResult(gameweek, season, getActualResults);
+	public HashMap<String, TestMatchResultsInfo> computeActualResults (String gameweek, String season) {
+		HashMap<String, TestMatchResultsInfo> computeActualResult = new HashMap<>();
+		getActualResult(gameweek, season, computeActualResult);
 
-		System.out.println("Player Attributes map size: " + getActualResults.size());
+		/*System.out.println("Player Attributes map size: " + getActualResults.size());
 		for (Entry<String, TestMatchResultsInfo> entry : getActualResults.entrySet()) {
 			System.out.println("-------------------------------");
 			String key = entry.getKey();
@@ -138,8 +139,56 @@ public class ValidateResults extends DBConnectionManager {
 			System.out.println("Values: " + values.getHomeTeamGoals() + " : " + values.getAwayTeamGoals());
 			for(int i = 0; i < values.getListOfInfluentialPlayers().size(); i++)
 				System.out.println("Influential Players: " + values.getListOfInfluentialPlayers().get(i));
-		}
+		}*/
 
-		return getActualResults;
+		return computeActualResult;
+	}
+	
+	public void compareResults(String gameweek, String season) {
+		HashMap<String, TestMatchResultsInfo> getActualResult = new HashMap<>();
+		getActualResult = computeActualResults(gameweek, season);
+		int totalMatchesPredicted = 0;
+		int totalPlayersPredicted = 0;
+		int correctMatchesPredicted = 0;
+		int correctPlayersPredicted = 0;
+		double percentCorrectMatches = 0.0;
+		double percentCorrectPlayers = 0.0;
+		
+		for(Entry<String, TestMatchResultsInfo> entry : getActualResult.entrySet()) {
+			String matchId = entry.getKey();
+			TestMatchResultsInfo actualResult = entry.getValue();
+			TestMatchResultsInfo predictedResult = new TestMatchResultsInfo();
+			MatchInfo matchDetails = new MatchInfo();
+			
+			matchDetails.setMatchId(matchId);
+			matchDetails.setHomeTeamId(actualResult.getHomeTeamId());
+			matchDetails.setAwayTeamId(actualResult.getAwayTeamId());
+			// TODO Return Predicted result here 
+			// predictedResult = getPredictedResult(matchDetails);
+			
+			totalMatchesPredicted += 1;
+			
+			if(Integer.parseInt(actualResult.getHomeTeamGoals()) > Integer.parseInt(actualResult.getAwayTeamGoals())
+					&& predictedResult.getWinProbabalityForHomeTeam() > predictedResult.getWinProbabalityForAwayTeam()) {
+				correctMatchesPredicted += 1;
+			}
+			
+			for(int i = 0; i < PREDICTION_FOR_HOW_MANY_PLAYERS; i++) {
+				String predictedPlayer = predictedResult.getListOfInfluentialPlayers().get(i);
+				totalPlayersPredicted += 1;
+				
+				if(actualResult.getListOfInfluentialPlayers().contains(predictedPlayer)) {
+					correctPlayersPredicted += 1;
+				}
+			}
+		}
+		
+		percentCorrectMatches = (correctMatchesPredicted / totalMatchesPredicted) * 100;
+		percentCorrectPlayers = (correctPlayersPredicted / totalPlayersPredicted) * 100;
+		System.out.println("Total Matches Predicted on: " + totalMatchesPredicted);
+		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectMatches);
+		System.out.println("-------------------------------------------");
+		System.out.println("Total Players predicted on: " + totalPlayersPredicted);
+		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectPlayers);
 	}
 }
