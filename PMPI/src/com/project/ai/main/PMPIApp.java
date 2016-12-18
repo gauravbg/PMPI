@@ -24,7 +24,7 @@ public class PMPIApp {
 			//testdriver.testDBQueries(args[0]);
 			ValidateResults valResults = new ValidateResults();
 			valResults.setDatabasePath(args[0]);
-			valResults.validateResults("37", "2008/2009");
+			valResults.computeActualResults("37", "2008/2009");
 			
 		} else {
 		
