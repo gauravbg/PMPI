@@ -24,7 +24,8 @@ public class PMPIApp {
 			//testdriver.testDBQueries(args[0]);
 			ValidateResults valResults = new ValidateResults();
 			valResults.setDatabasePath(args[0]);
-			valResults.computeActualResults("37", "2008/2009");
+			valResults.getPlayersWhoScoredOrAssisted("489132", "10260");
+			//valResults.computeActualResults("37", "2008/2009");
 			
 		} else {
 		
