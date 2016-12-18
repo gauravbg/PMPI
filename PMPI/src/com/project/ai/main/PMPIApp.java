@@ -20,8 +20,11 @@ public class PMPIApp {
 		
 		if(args[1].equals("TEST")) {
 			System.out.println("IN TEST MODE:");
-			TestDriver testdriver = new TestDriver();
-			testdriver.testDBQueries(args[0]);
+			//TestDriver testdriver = new TestDriver();
+			//testdriver.testDBQueries(args[0]);
+			ValidateResults valResults = new ValidateResults();
+			valResults.setDatabasePath(args[0]);
+			valResults.validateResults("37", "2008/2009");
 			
 		} else {
 		
@@ -64,7 +67,6 @@ public class PMPIApp {
 			in.close();
 
 		}
-		
 		
 	}
 

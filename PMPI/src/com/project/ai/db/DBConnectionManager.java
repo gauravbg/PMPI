@@ -25,7 +25,7 @@ public class DBConnectionManager {
 		dbPath = path;
 	}
 
-	Connection getConnection() {
+	protected Connection getConnection() {
 		
 		if(mDatabaseConnection == null) {
 			try {
