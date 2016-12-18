@@ -1,6 +1,6 @@
 package com.project.ai.interfaces;
 
-import com.project.ai.dataclasses.PlayerAttributes;
+import com.project.ai.dataclasses.PlayerAttributesInfo;
 
 public interface IPlayerInfluence {
 	
@@ -10,6 +10,6 @@ public interface IPlayerInfluence {
 	 * @param howManyMatches
 	 * @return <Position, Overall Rating, Goals, Assists, Shots On, Shots Off
 	 */
-	PlayerAttributes getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches);
+	PlayerAttributesInfo getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches);
 
 }
