@@ -559,14 +559,14 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			}
 		}
 		
-		System.out.println("Player Rating map size: " + playersRankingMap.size());
+		/* System.out.println("Player Rating map size: " + playersRankingMap.size());
 		for (Map.Entry<String, Integer> entry : playersRankingMap.entrySet()) {
 			System.out.println("-------------------------------");
 			String key = entry.getKey();
 			System.out.println("Key: " + key);
 			int values = entry.getValue();
 			System.out.println("Values: " + values);
-		}
+		} */
 		
 		return playersRankingMap;
 		
