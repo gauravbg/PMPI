@@ -2,6 +2,7 @@ package com.project.ai.dataclasses;
 
 public class PlayerAttributesInfo {
 	
+	String playerId;
 	String position;
 	int overallRating;
 	int goals;
@@ -9,6 +10,12 @@ public class PlayerAttributesInfo {
 	int shotsOnTarget;
 	int shotsOffTarget;
 	
+	public String getPlayerId() {
+		return playerId;
+	}
+	public void setPlayerId(String playerId) {
+		this.playerId = playerId;
+	}
 	public String getPosition() {
 		return position;
 	}

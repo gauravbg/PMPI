@@ -1,5 +1,7 @@
 package com.project.ai.db;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +16,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.project.ai.dataclasses.MatchInfo;
 import com.project.ai.dataclasses.PlayerAttributesInfo;
@@ -682,40 +694,138 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return null;
 	}
 	
-	public PlayerAttributesInfo getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches) {
+	public HashMap<String, PlayerAttributesInfo> getPlayerInfluenceInLastMatches(String matchId, ArrayList<PlayerInfo> players, int howManyMatches) {
 		Connection connection = getConnection();
-		PlayerAttributesInfo playerAttributes = new PlayerAttributesInfo();
-		int playerRating = getPlayerRating(playerId, matchId);
-		String playerPosition = getPositionOfPlayer(playerId, matchId);
+		HashMap<String, PlayerAttributesInfo> playerAttributesMap = new HashMap<>();
+		String homeTeamId, awayTeamId;
 		
-		String getRankingOfPlayersQuery = "Select overall_rating "
-				+ "From Player_Attributes as P Where player_api_id = ?"
-				+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
-				+ "Order By P.date Desc Limit 1;";
+		for(PlayerInfo player : players) {
+			PlayerAttributesInfo playerAttributes = new PlayerAttributesInfo();
+			String playerId = player.getPlayerId();
+			
+			int playerRating = getPlayerRating(playerId, matchId);
+			String playerPosition = getPositionOfPlayer(playerId, matchId);
+			playerAttributes.setOverallRating(playerRating);
+			playerAttributes.setPosition(playerPosition);
+			
+			playerAttributesMap.put(playerId, playerAttributes);
+			
+		}
 		
+		String getHomeAndAwayTeamQuery = "Select home_team_api_id, away_team_api_id "
+				+ "From Match "
+				+ "Where match_api_id = ?;";
 		
-		PreparedStatement preparedStatement;
+		PreparedStatement homeAndAwaypreparedStatement;
 		try {
-			preparedStatement = connection.prepareStatement(playerAttributesQuery);
-			preparedStatement.setString(1, teamId);
-			preparedStatement.setString(2, teamId);
-			preparedStatement.setString(3, matchId);
-			preparedStatement.setString(4, matchId);
-			preparedStatement.setString(5, teamId);
-			preparedStatement.setString(6, teamId);
-			ResultSet resultSetAway = preparedStatement.executeQuery();
-			while(resultSetAway.next()) {
-				String opposition = resultSetAway.getString("opposition");
-				if(opposition != null) {
-					if(!opponents.contains(opposition))
-						opponents.add(opposition);
+			homeAndAwaypreparedStatement = connection.prepareStatement(getHomeAndAwayTeamQuery);
+			homeAndAwaypreparedStatement.setString(1, matchId);
+
+			ResultSet homeAndAwayresultSet = homeAndAwaypreparedStatement.executeQuery();
+			while(homeAndAwayresultSet.next()) {
+				homeTeamId = homeAndAwayresultSet.getString("home_team_api_id");
+				awayTeamId = homeAndAwayresultSet.getString("away_team_api_id");
+				
+				String getPlayerAttributesQuery = "Select goal, shoton, shotoff, date "
+						+ "From Match "
+						+ "Where (home_team_api_id = ? Or away_team_api_id = ?) And date < (Select date from Match Where match_api_id = ?) "
+						+ "Order By date DESC limit ?;";
+				
+				PreparedStatement preparedStatement;
+				try {
+					preparedStatement = connection.prepareStatement(getPlayerAttributesQuery);
+					preparedStatement.setString(1, homeTeamId);
+					preparedStatement.setString(2, homeTeamId);
+					preparedStatement.setString(3, matchId);
+					preparedStatement.setString(4, String.valueOf(howManyMatches));
+					
+					ResultSet resultSet = preparedStatement.executeQuery();
+					while(resultSet.next()) {
+						String goal = resultSet.getString("goal");
+						String shoton = resultSet.getString("shoton");
+						String shotoff = resultSet.getString("shotoff");
+						System.out.println("Goal is: " + goal);
+						
+						DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+						try {
+							DocumentBuilder builder = factory.newDocumentBuilder();
+							InputSource is = new InputSource(new StringReader(goal));
+							
+							try {
+								Document doc = builder.parse(is);
+								NodeList noOfGoals = doc.getElementsByTagName("value");
+								
+								for (int i = 0; i < noOfGoals.getLength(); ++i)
+								{
+									Element allGoals = (Element) noOfGoals.item(i);
+									
+									NodeList goalScorerTeamList = allGoals.getElementsByTagName("team");
+									for (int j = 0; j < goalScorerTeamList.getLength(); ++j) {
+										Element gst = (Element) goalScorerTeamList.item(j);
+										String goalScorerTeam = gst.getFirstChild().getNodeValue();
+										
+										if(goalScorerTeam.equalsIgnoreCase(homeTeamId)) {
+											
+											NodeList goalScorerList = allGoals.getElementsByTagName("player1");
+									        for (int k = 0; k < goalScorerList.getLength(); ++k)
+									        {
+									            Element gs = (Element) goalScorerList.item(k);
+									            String goalScorer = gs.getFirstChild().getNodeValue();
+									            System.out.println("Goal scorer is: " + goalScorer);
+									            if(playerAttributesMap.containsKey(goalScorer)) {
+									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(goalScorer);
+									            	playerAttributeInfo.setGoals(playerAttributeInfo.getGoals() + 1);
+									            }
+									            
+									        }
+									        NodeList assisterList = allGoals.getElementsByTagName("player2");
+									        for (int k = 0; k < assisterList.getLength(); ++k)
+									        {
+									            Element as = (Element) assisterList.item(k);
+									            String assister = as.getFirstChild().getNodeValue();
+									            System.out.println("Assister is: " + assister);
+									            if(playerAttributesMap.containsKey(assister)) {
+									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(assister);
+									            	playerAttributeInfo.setAssists(playerAttributeInfo.getAssists() + 1);
+									            }
+									        }
+									        
+										}
+									}
+							        
+								}
+							} catch (SAXException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							
+						} catch (ParserConfigurationException e) {
+							e.printStackTrace();
+						}
+						
+						
+					}
+					preparedStatement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
 				}
+
 			}
-			preparedStatement.close();
+			homeAndAwaypreparedStatement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return playerAttributes;
+		System.out.println("Player Attributes map size: " + playerAttributesMap.size());
+		for (Entry<String, PlayerAttributesInfo> entry : playerAttributesMap.entrySet()) {
+			System.out.println("-------------------------------");
+			String key = entry.getKey();
+			System.out.println("Key: " + key);
+			PlayerAttributesInfo values = entry.getValue();
+			System.out.println("Values: " + values.getGoals() + " : " + values.getAssists() + " : " + values.getOverallRating());
+		}
+		
+		return playerAttributesMap;
 	}
 }
