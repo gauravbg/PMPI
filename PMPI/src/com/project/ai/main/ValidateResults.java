@@ -78,6 +78,71 @@ public class ValidateResults extends DBConnectionManager {
 		}
 		System.out.println("Actual results size: " + getActualResults.size());
 	}
+	
+	public ArrayList<String> getPlayersWhoScoredOrAssisted(String matchId, String teamId) {
+		Connection connection = getConnection();
+		ArrayList<String> importantPlayers = new ArrayList<>();
+		
+		String getResultsForSeasonQuery = "Select goal "
+				+ "From Match Where match_api_id = ? And (home_team_api_id = ? Or away_team_api_id = ?);";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getResultsForSeasonQuery);
+			preparedStatement.setString(1, matchId);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, teamId);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String goal = resultSet.getString("goal");
+				
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				try {
+					DocumentBuilder builder = factory.newDocumentBuilder();
+					InputSource is = new InputSource(new StringReader(goal));
+
+					try {
+						Document doc = builder.parse(is);
+						NodeList noOfGoals = doc.getElementsByTagName("value");
+
+						for (int i = 0; i < noOfGoals.getLength(); ++i)
+						{
+							Element allGoals = (Element) noOfGoals.item(i);
+
+							NodeList goalScorerList = allGoals.getElementsByTagName("player1");
+							for (int k = 0; k < goalScorerList.getLength(); ++k)
+							{
+								Element gs = (Element) goalScorerList.item(k);
+								String goalScorer = gs.getFirstChild().getNodeValue();
+								System.out.println("Goal scorer is: " + goalScorer);
+								importantPlayers.add(goalScorer);
+
+							}
+							NodeList assisterList = allGoals.getElementsByTagName("player2");
+							for (int k = 0; k < assisterList.getLength(); ++k)
+							{
+								Element as = (Element) assisterList.item(k);
+								String assister = as.getFirstChild().getNodeValue();
+								System.out.println("Assister is: " + assister);
+								importantPlayers.add(assister);
+							}
+						}
+					} catch (SAXException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+				} catch (ParserConfigurationException e) {
+					e.printStackTrace();
+				}
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return importantPlayers;
+	}
 
 	private void getListOfInfluentialPlayers (String goal, TestMatchResultsInfo testMatchResults) {
 		ArrayList<String> influentialPlayer = testMatchResults.getListOfInfluentialPlayers();
