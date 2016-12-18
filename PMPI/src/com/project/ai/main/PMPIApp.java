@@ -12,8 +12,6 @@ public class PMPIApp {
 	private static ArrayList<PlayerInfo> homePlayers;
 	private static ArrayList<PlayerInfo> awayPlayers;
 	private static int match;
-	private static int team;
-	private static int player;
 	
 	public static void main(String[] args) {
 
@@ -28,9 +26,9 @@ public class PMPIApp {
 		} else {
 		
 			System.out.print("Enter Season (YYYY/YYYY): ");
-			String season = "2011/2012";
+			String season = in.next();
 			System.out.print("Enter Gameweek (1-38): ");
-			String gw = "37";
+			String gw = in.next();
 			DatabaseHelper dbHelper = new DatabaseHelper();
 			dbHelper.setDatabasePath(args[0]);
 			matches = dbHelper.getAllMatchesInGameweek(season, gw);
@@ -59,19 +57,8 @@ public class PMPIApp {
 			}
 			
 			System.out.println("------------------------------------------------------------------");
-			System.out.print("Pick home team or away team (0 or 1): ");
-			team= 1;
-			System.out.print("Pick a player from the chosen team (Enter row number): ");
-			int player= 1;
-			System.out.println("------------------------------------------------------------------");
-			System.out.println("The algorithm will find player performance index for the following match and player:");
-			System.out.println("Match: " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName());
-			if(team == 0) {
-				System.out.println("Player: " + homePlayers.get(player-1).getPlayerName());
-			} else {
-				System.out.println("Player: " + awayPlayers.get(player-1).getPlayerName());
-			}
-			TeamStrengthCalculator teamStrength = new TeamStrengthCalculator(matches.get(match-1), (team==0?homePlayers.get(player-1):awayPlayers.get(player-1)), (team==0?true:false), Integer.parseInt(gw));
+			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+			TeamStrengthCalculator teamStrength = new TeamStrengthCalculator(matches.get(match-1), season, gw);
 			
 			in.close();
 
