@@ -531,16 +531,16 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		//			System.out.println(player.getPlayerName());
 		//		}
 		return playersPlayedRecently;
-}
-	
-	
+	}
+
+
 	public HashMap<String, Integer> getRatingsOfPlayers(ArrayList<PlayerInfo> playerIds, String matchId) {
 		Connection connection = getConnection();
 		HashMap<String, Integer> playersRankingMap = new HashMap<>();
-		
+
 		for(PlayerInfo player : playerIds) {
 			String playerId = player.getPlayerId();
-			
+
 			String getRankingOfPlayersQuery = "Select overall_rating, P.date "
 					+ "From Player_Attributes as P Where player_api_id = ?"
 					+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
@@ -550,7 +550,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				preparedStatement = connection.prepareStatement(getRankingOfPlayersQuery);
 				preparedStatement.setString(1, playerId);
 				preparedStatement.setString(2, matchId);
-				
+
 				ResultSet resultSet = preparedStatement.executeQuery();
 				while(resultSet.next()) {
 					String overallRating = resultSet.getString("overall_rating");
@@ -560,7 +560,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				e.printStackTrace();
 			}
 		}
-		
+
 		/* System.out.println("Player Rating map size: " + playersRankingMap.size());
 		for (Map.Entry<String, Integer> entry : playersRankingMap.entrySet()) {
 			System.out.println("-------------------------------");
@@ -569,9 +569,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			int values = entry.getValue();
 			System.out.println("Values: " + values);
 		} */
-		
+
 		return playersRankingMap;
-		
+
 	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
@@ -650,7 +650,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		//		System.out.println("Opponents size: " + opponents.size());
 		return opponents;
 	}
-	
+
 	private int getPlayerRating(String playerId, String matchId) {
 		Connection connection = getConnection();
 		int rating = 0;
@@ -659,7 +659,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				+ "From Player_Attributes as P Where player_api_id = ?"
 				+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
 				+ "Order By P.date Desc Limit 1;";
-		
+
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = connection.prepareStatement(getRatingOfPlayersQuery);
@@ -677,23 +677,106 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return rating;
 
 	}
-	
-	private String getPositionOfPlayer(String playerId, String matchId) {
-		return null;
+
+	public String getPositionOfPlayer(String playerId, String matchId) {
+		Connection connection = getConnection();
+		String[] positions = {"DEF", "MID", "ATT", "NA"};
+		String position = positions[3];
+		String getPlayerNumberQuery = "Select home_player_X1, home_player_X2, home_player_X3, home_player_X4, home_player_X5, "
+				+ "home_player_X6, home_player_X7, home_player_X8, home_player_X9, home_player_X10, home_player_X11, "
+				+ "home_player_Y1, home_player_Y2, home_player_Y3, home_player_Y4, home_player_Y5, "
+				+ "home_player_Y6, home_player_Y7, home_player_Y8, home_player_Y9, home_player_Y10, home_player_Y11, "
+				+ "away_player_X1, away_player_X2, away_player_X3, away_player_X4, away_player_X5, "
+				+ "away_player_X6, away_player_X7, away_player_X8, away_player_X9, away_player_X10, away_player_X11, "
+				+ "away_player_Y1, away_player_Y2, away_player_Y3, away_player_Y4, away_player_Y5, "
+				+ "away_player_Y6, away_player_Y7, away_player_Y8, away_player_Y9, away_player_Y10, away_player_Y11, "
+				+ "home_player_1, home_player_2, home_player_3, home_player_4, "
+				+ "home_player_5, home_player_6, home_player_7, "
+				+ "home_player_8, home_player_9, home_player_10, home_player_11, away_player_1, away_player_2, away_player_3, "
+				+ "away_player_4, away_player_5, away_player_6, away_player_7, away_player_8, away_player_9, away_player_10, "
+				+ "away_player_11 From Match Where match_api_id = ?";
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getPlayerNumberQuery);
+			preparedStatement.setString(1, matchId);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+
+				String gameType = "";
+				int pos = 0;
+
+				StringBuilder homeBaseColumnName = new StringBuilder();
+				homeBaseColumnName.append("home_player_");
+				StringBuilder awayBaseColumnName = new StringBuilder();
+				awayBaseColumnName.append("away_player_");
+
+				for(int i = 1; i <= 11; i++){
+					StringBuilder column = new StringBuilder(homeBaseColumnName);
+					String columnName = column.append(i).toString();
+					String resultPlayerId = resultSet.getString(columnName);
+					if(resultPlayerId.equals(playerId)) {
+						pos = i;
+						gameType = "home";
+					}
+				}
+
+				for(int i = 1; i <= 11; i++){
+					StringBuilder column = new StringBuilder(awayBaseColumnName);
+					String columnName = column.append(i).toString();
+					String resultPlayerId = resultSet.getString(columnName);
+					if(resultPlayerId.equals(playerId)) {
+						pos = i;
+						gameType = "away";
+					}
+				}
+
+				String y_pos = "0";
+				if(gameType.equals("home")) {
+					StringBuilder positionColumnX = new StringBuilder();
+					positionColumnX.append("home_player_X");
+					positionColumnX.append(pos);
+					StringBuilder positionColumnY = new StringBuilder();
+					positionColumnY.append("home_player_Y");
+					positionColumnY.append(pos);
+					y_pos = resultSet.getString(positionColumnY.toString());
+				} else if (gameType.equals("away")) {
+					StringBuilder positionColumnX = new StringBuilder();
+					positionColumnX.append("away_player_X");
+					positionColumnX.append(pos);
+					StringBuilder positionColumnY = new StringBuilder();
+					positionColumnY.append("away_player_Y");
+					positionColumnY.append(pos);
+					y_pos = resultSet.getString(positionColumnY.toString());
+				}
+
+				int y_position = Integer.valueOf(y_pos);
+				if(y_position < 0 && y_position <= 6) {
+					position = positions[0];
+				} else if (y_position > 6 && y_position <= 8) {
+					position = positions[1];
+				} else if (y_position > 8) {
+					position = positions[2];
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Pos: " + position);
+		return position;
 	}
-	
+
 	public PlayerAttributesInfo getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches) {
 		Connection connection = getConnection();
 		PlayerAttributesInfo playerAttributes = new PlayerAttributesInfo();
 		int playerRating = getPlayerRating(playerId, matchId);
 		String playerPosition = getPositionOfPlayer(playerId, matchId);
-		
+
 		String getRankingOfPlayersQuery = "Select overall_rating "
 				+ "From Player_Attributes as P Where player_api_id = ?"
 				+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
 				+ "Order By P.date Desc Limit 1;";
-		
-		
+
+
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = connection.prepareStatement(playerAttributesQuery);
@@ -715,7 +798,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return playerAttributes;
 	}
 }
