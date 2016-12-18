@@ -1,15 +1,19 @@
 package com.project.ai.interfaces;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.project.ai.dataclasses.PlayerAttributesInfo;
+import com.project.ai.dataclasses.PlayerInfo;
 
 public interface IPlayerInfluence {
 	
 	/** Returns an object of PlayerAttributes with
 	 * @param matchId
-	 * @param playerId
+	 * @param 
 	 * @param howManyMatches
 	 * @return <Position, Overall Rating, Goals, Assists, Shots On, Shots Off
 	 */
-	PlayerAttributesInfo getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches);
+	HashMap<String, PlayerAttributesInfo> getPlayerInfluenceInLastMatches(String matchId, ArrayList<PlayerInfo> players, int howManyMatches);
 
 }
