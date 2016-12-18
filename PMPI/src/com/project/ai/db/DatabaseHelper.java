@@ -358,7 +358,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 
 	@Override
 
-	public void getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
+	public HashMap<String, ArrayList<PlayerInfo>> getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames) {
 		Connection connection = getConnection();
 		HashMap<String, ArrayList<PlayerInfo>> playersPlayedMap = new HashMap<>();
 		String getPlayersInLastFewMatchesQuery = "Select match_api_id, date, home_team_api_id, away_team_api_id, "
@@ -421,7 +421,61 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				System.out.println("Player: " + value.getPlayerName());
 			}
 		}
+		return playersPlayedMap;
+	}
+	
+	private String makeQuery(int len) {
+	    if (len < 1) {
+	        throw new RuntimeException("No placeholders");
+	    }
+	    else {
+	        StringBuilder sb = new StringBuilder(len * 2 - 1);
+	        sb.append("?");
+	        for (int i = 1; i < len; i++) {
+	            sb.append(",?");
+	        }
+	        return sb.toString();
+	    }
+	}
+	
+	public HashMap<String, Integer> getRankingOfPlayersFromTeam(ArrayList<PlayerInfo> playerIds, String matchId) {
+		Connection connection = getConnection();
+		HashMap<String, Integer> playersRankingMap = new HashMap<>();
+		
+		for(PlayerInfo player : playerIds) {
+			String playerId = player.getPlayerId();
+			
+			String getRankingOfPlayersQuery = "Select overall_rating, P.date "
+					+ "From Player_Attributes as P Where player_api_id = ?"
+					+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
+					+ "Order By P.date Desc Limit 1;";
+			PreparedStatement preparedStatement;
+			try {
+				preparedStatement = connection.prepareStatement(getRankingOfPlayersQuery);
+				preparedStatement.setString(1, playerId);
+				preparedStatement.setString(2, matchId);
+				
+				ResultSet resultSet = preparedStatement.executeQuery();
+				while(resultSet.next()) {
+					String overallRating = resultSet.getString("overall_rating");
+					playersRankingMap.put(playerId, Integer.parseInt(overallRating));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
+		
+		System.out.println("Player Rating map size: " + playersRankingMap.size());
+		for (Map.Entry<String, Integer> entry : playersRankingMap.entrySet()) {
+			System.out.println("-------------------------------");
+			String key = entry.getKey();
+			System.out.println("Key: " + key);
+			int values = entry.getValue();
+			System.out.println("Values: " + values);
+		}
+		
+		return playersRankingMap;
+	}
 
 	private String[] getTeamLongAndShortNames(String teamApiId) {
 		String[] teamNames = new String[2];

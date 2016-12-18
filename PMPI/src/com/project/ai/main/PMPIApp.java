@@ -16,7 +16,7 @@ public class PMPIApp {
 		if(args[1].equals("TEST")) {
 			System.out.println("IN TEST MODE:");
 			TestDriver testdriver = new TestDriver();
-			testdriver.testDBQueries();
+			testdriver.testDBQueries(args[0]);
 			
 		} else {
 		
