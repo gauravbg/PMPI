@@ -438,7 +438,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	    }
 	}
 	
-	public HashMap<String, Integer> getRankingOfPlayersFromTeam(ArrayList<PlayerInfo> playerIds, String matchId) {
+	public HashMap<String, Integer> getRatingsOfPlayers(ArrayList<PlayerInfo> playerIds, String matchId) {
 		Connection connection = getConnection();
 		HashMap<String, Integer> playersRankingMap = new HashMap<>();
 		

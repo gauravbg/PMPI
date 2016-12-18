@@ -23,7 +23,7 @@ public class TestDriver {
 		player2.setPlayerId("30829");
 		players.add(player1);
 		players.add(player2);
-		databaseHelper.getRankingOfPlayersFromTeam(players, "489132");
+		databaseHelper.getRatingsOfPlayers(players, "489132");
 	}
 
 }
