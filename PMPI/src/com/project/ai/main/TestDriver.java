@@ -28,10 +28,18 @@ public class TestDriver {
 		PlayerInfo player4 = new PlayerInfo();
 		player4.setPlayerName("Cristiano Ronaldo");
 		player4.setPlayerId("30893");
+		PlayerInfo player5 = new PlayerInfo();
+		player5.setPlayerName("Craig Bellamy");
+		player5.setPlayerId("33781");
+		PlayerInfo player6 = new PlayerInfo();
+		player6.setPlayerName("Carlton Cole");
+		player6.setPlayerId("34543");
 		players.add(player1);
 		players.add(player2);
 		players.add(player3);
 		players.add(player4);
+		players.add(player5);
+		players.add(player6);
 		//databaseHelper.getRatingsOfPlayers(players, "489132");
 		
 		databaseHelper.getPlayerInfluenceInLastMatches("489132", players, 5);

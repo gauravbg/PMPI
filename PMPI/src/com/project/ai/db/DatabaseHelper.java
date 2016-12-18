@@ -777,6 +777,166 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return position;
 	}
 	
+	private void getGoalsAndAssists(String goal, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			InputSource is = new InputSource(new StringReader(goal));
+			
+			try {
+				Document doc = builder.parse(is);
+				NodeList noOfGoals = doc.getElementsByTagName("value");
+				
+				for (int i = 0; i < noOfGoals.getLength(); ++i)
+				{
+					Element allGoals = (Element) noOfGoals.item(i);
+					
+					NodeList goalScorerTeamList = allGoals.getElementsByTagName("team");
+					for (int j = 0; j < goalScorerTeamList.getLength(); ++j) {
+						Element gst = (Element) goalScorerTeamList.item(j);
+						String goalScorerTeam = gst.getFirstChild().getNodeValue();
+						
+						if(goalScorerTeam.equalsIgnoreCase(teamId)) {
+							
+							NodeList goalScorerList = allGoals.getElementsByTagName("player1");
+					        for (int k = 0; k < goalScorerList.getLength(); ++k)
+					        {
+					            Element gs = (Element) goalScorerList.item(k);
+					            String goalScorer = gs.getFirstChild().getNodeValue();
+					            System.out.println("Goal scorer is: " + goalScorer);
+					            if(playerAttributesMap.containsKey(goalScorer)) {
+					            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(goalScorer);
+					            	playerAttributeInfo.setGoals(playerAttributeInfo.getGoals() + 1);
+					            }
+					            
+					        }
+					        NodeList assisterList = allGoals.getElementsByTagName("player2");
+					        for (int k = 0; k < assisterList.getLength(); ++k)
+					        {
+					            Element as = (Element) assisterList.item(k);
+					            String assister = as.getFirstChild().getNodeValue();
+					            System.out.println("Assister is: " + assister);
+					            if(playerAttributesMap.containsKey(assister)) {
+					            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(assister);
+					            	playerAttributeInfo.setAssists(playerAttributeInfo.getAssists() + 1);
+					            }
+					        }
+					        
+						}
+					}
+			        
+				}
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void getShotsOnTarget(String shoton, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		// Calculate shot on
+		try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			InputSource is = new InputSource(new StringReader(shoton));
+
+			try {
+				Document doc = builder.parse(is);
+				NodeList noOfShotsOnTarget = doc.getElementsByTagName("value");
+
+				for (int i = 0; i < noOfShotsOnTarget.getLength(); ++i)
+				{
+					Element allShotsOn = (Element) noOfShotsOnTarget.item(i);
+
+					NodeList allShotsOnList = allShotsOn.getElementsByTagName("team");
+					for (int j = 0; j < allShotsOnList.getLength(); ++j) {
+						Element sont = (Element) allShotsOnList.item(j);
+						String shotsOnTargetTeam = sont.getFirstChild().getNodeValue();
+
+						if(shotsOnTargetTeam.equalsIgnoreCase(teamId)) {
+
+							NodeList shotsOnTargetList = allShotsOn.getElementsByTagName("player1");
+							for (int k = 0; k < shotsOnTargetList.getLength(); ++k)
+							{
+								Element gs = (Element) shotsOnTargetList.item(k);
+								String shotOnTargetBy = gs.getFirstChild().getNodeValue();
+								System.out.println("Shot on Target by: " + shotOnTargetBy);
+								if(playerAttributesMap.containsKey(shotOnTargetBy)) {
+									PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(shotOnTargetBy);
+									playerAttributeInfo.setShotsOnTarget(playerAttributeInfo.getShotsOnTarget() + 1);
+								}
+
+							}
+
+						}
+					}
+
+				}
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void getShotsOffTarget(String shotoff, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			InputSource is = new InputSource(new StringReader(shotoff));
+
+			try {
+				Document doc = builder.parse(is);
+				NodeList noOfShotsOff = doc.getElementsByTagName("value");
+
+				for (int i = 0; i < noOfShotsOff.getLength(); ++i)
+				{
+					Element allShotsOff = (Element) noOfShotsOff.item(i);
+
+					NodeList shotsOffList = allShotsOff.getElementsByTagName("team");
+					for (int j = 0; j < shotsOffList.getLength(); ++j) {
+						Element gst = (Element) shotsOffList.item(j);
+						String shotsOffTeam = gst.getFirstChild().getNodeValue();
+
+						if(shotsOffTeam.equalsIgnoreCase(teamId)) {
+
+							NodeList playersShotsOffList = allShotsOff.getElementsByTagName("player1");
+							for (int k = 0; k < playersShotsOffList.getLength(); ++k)
+							{
+								Element gs = (Element) playersShotsOffList.item(k);
+								String playerShotsOff = gs.getFirstChild().getNodeValue();
+								System.out.println("Shot off target by: " + playerShotsOff);
+								if(playerAttributesMap.containsKey(playerShotsOff)) {
+									PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(playerShotsOff);
+									playerAttributeInfo.setShotsOffTarget(playerAttributeInfo.getShotsOffTarget() + 1);
+								}
+
+							}
+
+						}
+					}
+
+				}
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public HashMap<String, PlayerAttributesInfo> getPlayerInfluenceInLastMatches(String matchId, ArrayList<PlayerInfo> players, int howManyMatches) {
 		Connection connection = getConnection();
 		HashMap<String, PlayerAttributesInfo> playerAttributesMap = new HashMap<>();
@@ -815,177 +975,55 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						+ "Where (home_team_api_id = ? Or away_team_api_id = ?) And date < (Select date from Match Where match_api_id = ?) "
 						+ "Order By date DESC limit ?;";
 				
-				PreparedStatement preparedStatement;
+				PreparedStatement homeTeamPreparedStatement;
 				try {
-					preparedStatement = connection.prepareStatement(getPlayerAttributesQuery);
-					preparedStatement.setString(1, homeTeamId);
-					preparedStatement.setString(2, homeTeamId);
-					preparedStatement.setString(3, matchId);
-					preparedStatement.setString(4, String.valueOf(howManyMatches));
+					homeTeamPreparedStatement = connection.prepareStatement(getPlayerAttributesQuery);
+					homeTeamPreparedStatement.setString(1, homeTeamId);
+					homeTeamPreparedStatement.setString(2, homeTeamId);
+					homeTeamPreparedStatement.setString(3, matchId);
+					homeTeamPreparedStatement.setString(4, String.valueOf(howManyMatches));
 					
-					ResultSet resultSet = preparedStatement.executeQuery();
+					ResultSet resultSet = homeTeamPreparedStatement.executeQuery();
 					while(resultSet.next()) {
 						String goal = resultSet.getString("goal");
 						String shoton = resultSet.getString("shoton");
 						String shotoff = resultSet.getString("shotoff");
-						System.out.println("Goal is: " + goal);
 						
-						DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-						try {
-							DocumentBuilder builder = factory.newDocumentBuilder();
-							InputSource is = new InputSource(new StringReader(goal));
-							
-							try {
-								Document doc = builder.parse(is);
-								NodeList noOfGoals = doc.getElementsByTagName("value");
-								
-								for (int i = 0; i < noOfGoals.getLength(); ++i)
-								{
-									Element allGoals = (Element) noOfGoals.item(i);
-									
-									NodeList goalScorerTeamList = allGoals.getElementsByTagName("team");
-									for (int j = 0; j < goalScorerTeamList.getLength(); ++j) {
-										Element gst = (Element) goalScorerTeamList.item(j);
-										String goalScorerTeam = gst.getFirstChild().getNodeValue();
-										
-										if(goalScorerTeam.equalsIgnoreCase(homeTeamId)) {
-											
-											NodeList goalScorerList = allGoals.getElementsByTagName("player1");
-									        for (int k = 0; k < goalScorerList.getLength(); ++k)
-									        {
-									            Element gs = (Element) goalScorerList.item(k);
-									            String goalScorer = gs.getFirstChild().getNodeValue();
-									            System.out.println("Goal scorer is: " + goalScorer);
-									            if(playerAttributesMap.containsKey(goalScorer)) {
-									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(goalScorer);
-									            	playerAttributeInfo.setGoals(playerAttributeInfo.getGoals() + 1);
-									            }
-									            
-									        }
-									        NodeList assisterList = allGoals.getElementsByTagName("player2");
-									        for (int k = 0; k < assisterList.getLength(); ++k)
-									        {
-									            Element as = (Element) assisterList.item(k);
-									            String assister = as.getFirstChild().getNodeValue();
-									            System.out.println("Assister is: " + assister);
-									            if(playerAttributesMap.containsKey(assister)) {
-									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(assister);
-									            	playerAttributeInfo.setAssists(playerAttributeInfo.getAssists() + 1);
-									            }
-									        }
-									        
-										}
-									}
-							        
-								}
-							} catch (SAXException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							
-						} catch (ParserConfigurationException e) {
-							e.printStackTrace();
-						}
-						
-						
-						// Calculate shot on
-						try {
-							DocumentBuilder builder = factory.newDocumentBuilder();
-							InputSource is = new InputSource(new StringReader(shoton));
-							
-							try {
-								Document doc = builder.parse(is);
-								NodeList noOfShotsOnTarget = doc.getElementsByTagName("value");
-								
-								for (int i = 0; i < noOfShotsOnTarget.getLength(); ++i)
-								{
-									Element allShotsOn = (Element) noOfShotsOnTarget.item(i);
-									
-									NodeList allShotsOnList = allShotsOn.getElementsByTagName("team");
-									for (int j = 0; j < allShotsOnList.getLength(); ++j) {
-										Element sont = (Element) allShotsOnList.item(j);
-										String shotsOnTargetTeam = sont.getFirstChild().getNodeValue();
-										
-										if(shotsOnTargetTeam.equalsIgnoreCase(homeTeamId)) {
-											
-											NodeList shotsOnTargetList = allShotsOn.getElementsByTagName("player1");
-									        for (int k = 0; k < shotsOnTargetList.getLength(); ++k)
-									        {
-									            Element gs = (Element) shotsOnTargetList.item(k);
-									            String shotOnTargetBy = gs.getFirstChild().getNodeValue();
-									            System.out.println("Shot on Target by: " + shotOnTargetBy);
-									            if(playerAttributesMap.containsKey(shotOnTargetBy)) {
-									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(shotOnTargetBy);
-									            	playerAttributeInfo.setShotsOnTarget(playerAttributeInfo.getShotsOnTarget() + 1);
-									            }
-									            
-									        }
-									        
-										}
-									}
-							        
-								}
-							} catch (SAXException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							
-						} catch (ParserConfigurationException e) {
-							e.printStackTrace();
-						}
-						
-						// calculate shotoff
-						try {
-							DocumentBuilder builder = factory.newDocumentBuilder();
-							InputSource is = new InputSource(new StringReader(shotoff));
-							
-							try {
-								Document doc = builder.parse(is);
-								NodeList noOfShotsOff = doc.getElementsByTagName("value");
-								
-								for (int i = 0; i < noOfShotsOff.getLength(); ++i)
-								{
-									Element allShotsOff = (Element) noOfShotsOff.item(i);
-									
-									NodeList shotsOffList = allShotsOff.getElementsByTagName("team");
-									for (int j = 0; j < shotsOffList.getLength(); ++j) {
-										Element gst = (Element) shotsOffList.item(j);
-										String shotsOffTeam = gst.getFirstChild().getNodeValue();
-										
-										if(shotsOffTeam.equalsIgnoreCase(homeTeamId)) {
-											
-											NodeList playersShotsOffList = allShotsOff.getElementsByTagName("player1");
-									        for (int k = 0; k < playersShotsOffList.getLength(); ++k)
-									        {
-									            Element gs = (Element) playersShotsOffList.item(k);
-									            String playerShotsOff = gs.getFirstChild().getNodeValue();
-									            System.out.println("Shot off target by: " + playerShotsOff);
-									            if(playerAttributesMap.containsKey(playerShotsOff)) {
-									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(playerShotsOff);
-									            	playerAttributeInfo.setShotsOffTarget(playerAttributeInfo.getShotsOffTarget() + 1);
-									            }
-									            
-									        }
-									        
-										}
-									}
-							        
-								}
-							} catch (SAXException e) {
-								e.printStackTrace();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							
-						} catch (ParserConfigurationException e) {
-							e.printStackTrace();
-						}
-						
+						System.out.println("Stats for Home Team");
+						getGoalsAndAssists(goal, homeTeamId, playerAttributesMap);
+						getShotsOnTarget(shoton, homeTeamId, playerAttributesMap);
+						getShotsOffTarget(shotoff, homeTeamId, playerAttributesMap);
+						System.out.println("-------------------------------------------");
 						
 					}
-					preparedStatement.close();
+					homeTeamPreparedStatement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
+				PreparedStatement awayTeamPreparedStatement;
+				try {
+					awayTeamPreparedStatement = connection.prepareStatement(getPlayerAttributesQuery);
+					awayTeamPreparedStatement.setString(1, awayTeamId);
+					awayTeamPreparedStatement.setString(2, awayTeamId);
+					awayTeamPreparedStatement.setString(3, matchId);
+					awayTeamPreparedStatement.setString(4, String.valueOf(howManyMatches));
+					
+					ResultSet resultSet = awayTeamPreparedStatement.executeQuery();
+					while(resultSet.next()) {
+						String goal = resultSet.getString("goal");
+						String shoton = resultSet.getString("shoton");
+						String shotoff = resultSet.getString("shotoff");
+						
+						System.out.println();
+						System.out.println("Stats for Away Team");
+						getGoalsAndAssists(goal, awayTeamId, playerAttributesMap);
+						getShotsOnTarget(shoton, awayTeamId, playerAttributesMap);
+						getShotsOffTarget(shotoff, awayTeamId, playerAttributesMap);
+						System.out.println("---------------------------------------------");
+						
+					}
+					awayTeamPreparedStatement.close();
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
