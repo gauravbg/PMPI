@@ -16,13 +16,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.project.ai.dataclasses.MatchInfo;
+import com.project.ai.dataclasses.PlayerAttributesInfo;
 import com.project.ai.dataclasses.PlayerInfo;
 import com.project.ai.dataclasses.TeamInfo;
 import com.project.ai.interfaces.IBasicTeamsInfo;
+import com.project.ai.interfaces.IPlayerInfluence;
 import com.project.ai.interfaces.ITeamForm;
 import com.project.ai.interfaces.ITeamStrength;
 
-public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsInfo, ITeamStrength, ITeamForm {
+public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsInfo, ITeamStrength, ITeamForm, IPlayerInfluence {
 
 	public static String EPL_LEAGUE_ID = "1729";
 
@@ -647,5 +649,73 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		}
 		//		System.out.println("Opponents size: " + opponents.size());
 		return opponents;
+	}
+	
+	private int getPlayerRating(String playerId, String matchId) {
+		Connection connection = getConnection();
+		int rating = 0;
+
+		String getRatingOfPlayersQuery = "Select overall_rating "
+				+ "From Player_Attributes as P Where player_api_id = ?"
+				+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
+				+ "Order By P.date Desc Limit 1;";
+		
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getRatingOfPlayersQuery);
+			preparedStatement.setString(1, playerId);
+			preparedStatement.setString(2, matchId);
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				rating = resultSet.getInt("overall_rating");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return rating;
+
+	}
+	
+	private String getPositionOfPlayer(String playerId, String matchId) {
+		return null;
+	}
+	
+	public PlayerAttributesInfo getPlayerInfluenceInLastMatches(String matchId, String playerId, int howManyMatches) {
+		Connection connection = getConnection();
+		PlayerAttributesInfo playerAttributes = new PlayerAttributesInfo();
+		int playerRating = getPlayerRating(playerId, matchId);
+		String playerPosition = getPositionOfPlayer(playerId, matchId);
+		
+		String getRankingOfPlayersQuery = "Select overall_rating "
+				+ "From Player_Attributes as P Where player_api_id = ?"
+				+ "and P.date < (Select M.date From Match as M Where match_api_id = ?) "
+				+ "Order By P.date Desc Limit 1;";
+		
+		
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(playerAttributesQuery);
+			preparedStatement.setString(1, teamId);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, matchId);
+			preparedStatement.setString(4, matchId);
+			preparedStatement.setString(5, teamId);
+			preparedStatement.setString(6, teamId);
+			ResultSet resultSetAway = preparedStatement.executeQuery();
+			while(resultSetAway.next()) {
+				String opposition = resultSetAway.getString("opposition");
+				if(opposition != null) {
+					if(!opponents.contains(opposition))
+						opponents.add(opposition);
+				}
+			}
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return playerAttributes;
 	}
 }
