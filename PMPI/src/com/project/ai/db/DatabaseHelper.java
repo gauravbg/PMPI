@@ -777,7 +777,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		return position;
 	}
 	
-	private HashMap<String, PlayerAttributesInfo> getGoalsAndAssists(String goal, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+	private void getGoalsAndAssists(String goal, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		try {
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -835,10 +835,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-		return playerAttributesMap;
 	}
 	
-	private HashMap<String, PlayerAttributesInfo> getShotsOnTarget(String shoton, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+	private void getShotsOnTarget(String shoton, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
 		// Calculate shot on
@@ -887,10 +886,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-		return playerAttributesMap;
 	}
 	
-	private HashMap<String, PlayerAttributesInfo> getShotsOffTarget(String shotoff, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
+	private void getShotsOffTarget(String shotoff, String teamId, HashMap<String, PlayerAttributesInfo> playerAttributesMap) {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		try {
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -937,7 +935,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-		return playerAttributesMap;
 	}
 	
 	public HashMap<String, PlayerAttributesInfo> getPlayerInfluenceInLastMatches(String matchId, ArrayList<PlayerInfo> players, int howManyMatches) {
