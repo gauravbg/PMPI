@@ -13,6 +13,7 @@ public class TestDriver {
 		//		databaseHelper.getAllMatchesInGameweek("2009/2010", "13");
 		// databaseHelper.getListOfPlayersPlayed("10260", "489132", 5);
 		//		databaseHelper.getStandingsOfSeasonForGameWeek("2009/2010", "38");
+    // databaseHelper.getPositionOfPlayer("27430", "489132");
 		
 		ArrayList<PlayerInfo> players = new ArrayList<>();
 		PlayerInfo player1 = new PlayerInfo();

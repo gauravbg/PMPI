@@ -57,8 +57,9 @@ public class PMPIApp {
 			}
 			
 			System.out.println("------------------------------------------------------------------");
-			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+			System.out.println("Predicting for " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
 			TeamStrengthCalculator teamStrength = new TeamStrengthCalculator(matches.get(match-1), season, gw);
+			//System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
 			
 			in.close();
 
