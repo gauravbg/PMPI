@@ -756,7 +756,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 				}
 
 				int y_position = Integer.valueOf(y_pos);
-				if(y_position < 0 && y_position <= 6) {
+				if(y_position > 0 && y_position <= 6) {
 					position = positions[0];
 				} else if (y_position > 6 && y_position <= 8) {
 					position = positions[1];
