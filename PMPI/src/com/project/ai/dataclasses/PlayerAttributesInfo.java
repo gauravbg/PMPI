@@ -1,6 +1,6 @@
 package com.project.ai.dataclasses;
 
-public class PlayerAttributes {
+public class PlayerAttributesInfo {
 	
 	String position;
 	int overallRating;
