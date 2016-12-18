@@ -12,5 +12,7 @@ public interface ITeamForm {
 	
 	// Rank players based on their ratings. Returns <PlayerId, Rating (out of 11)>
 	HashMap<String, Integer> getRatingsOfPlayers(ArrayList<PlayerInfo> playerIds, String matchId);
+	
+	ArrayList<ArrayList<Integer>> getPreviousResults(String teamId, String matchId, int lastHowManyMatches);
 
 }

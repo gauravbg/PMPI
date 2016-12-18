@@ -1045,4 +1045,47 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		
 		return playerAttributesMap;
 	}
+	
+	@Override
+	public ArrayList<ArrayList<Integer>> getPreviousResults(String teamId, String matchId, int lastHowManyMatches) {
+		Connection connection = getConnection();
+		ArrayList<ArrayList<Integer>> scorelines = new ArrayList<>();
+		String getPreviousResultsQuery = "Select home_team_api_id, away_team_api_id, home_team_goal, away_team_goal "
+				+ "From Match Where (home_team_api_id = ? Or away_team_api_id = ?) "
+				+ "And date < (Select date from Match Where match_api_id = ?) "
+				+ "Order By date DESC limit ?;";
+
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = connection.prepareStatement(getPreviousResultsQuery);
+			preparedStatement.setString(1, teamId);
+			preparedStatement.setString(2, teamId);
+			preparedStatement.setString(3, matchId);
+			preparedStatement.setString(4, String.valueOf(lastHowManyMatches));
+
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				String home_team_api_id = resultSet.getString("home_team_api_id");
+				String away_team_api_id = resultSet.getString("away_team_api_id");
+				String home_team_goal = resultSet.getString("home_team_goal");
+				String away_team_goal = resultSet.getString("away_team_goal");
+
+				ArrayList<Integer> score = new ArrayList<>();
+				if(teamId.equals(home_team_api_id)) {
+					score.add(Integer.valueOf(home_team_goal));
+					score.add(Integer.valueOf(away_team_goal));
+				} else if(teamId.equals(away_team_api_id)) {
+					score.add(Integer.valueOf(away_team_goal));
+					score.add(Integer.valueOf(home_team_goal));
+				}
+				scorelines.add(score);
+			}
+			//			System.out.println("Scores: " + scorelines.size());
+
+			preparedStatement.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return scorelines;
+	}
 }
