@@ -8,7 +8,7 @@ import com.project.ai.dataclasses.PlayerInfo;
 public interface ITeamForm {
 	
 	// Get players who played in the lastHowManyGames
-	HashMap<String, ArrayList<PlayerInfo>> getListOfPlayersPlayed(String teamId, String matchId, int inHowManyGames);
+	ArrayList<PlayerInfo> getListOfPlayersPlayed(String teamId, String matchId, int inLastHowManyGames);
 	
 	// Rank players based on their ratings. Returns <PlayerId, Rating (out of 11)>
 	HashMap<String, Integer> getRatingsOfPlayers(ArrayList<PlayerInfo> playerIds, String matchId);
