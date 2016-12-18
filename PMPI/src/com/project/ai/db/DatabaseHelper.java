@@ -889,6 +889,101 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						}
 						
 						
+						// Calculate shot on
+						try {
+							DocumentBuilder builder = factory.newDocumentBuilder();
+							InputSource is = new InputSource(new StringReader(shoton));
+							
+							try {
+								Document doc = builder.parse(is);
+								NodeList noOfShotsOnTarget = doc.getElementsByTagName("value");
+								
+								for (int i = 0; i < noOfShotsOnTarget.getLength(); ++i)
+								{
+									Element allShotsOn = (Element) noOfShotsOnTarget.item(i);
+									
+									NodeList allShotsOnList = allShotsOn.getElementsByTagName("team");
+									for (int j = 0; j < allShotsOnList.getLength(); ++j) {
+										Element sont = (Element) allShotsOnList.item(j);
+										String shotsOnTargetTeam = sont.getFirstChild().getNodeValue();
+										
+										if(shotsOnTargetTeam.equalsIgnoreCase(homeTeamId)) {
+											
+											NodeList shotsOnTargetList = allShotsOn.getElementsByTagName("player1");
+									        for (int k = 0; k < shotsOnTargetList.getLength(); ++k)
+									        {
+									            Element gs = (Element) shotsOnTargetList.item(k);
+									            String shotOnTargetBy = gs.getFirstChild().getNodeValue();
+									            System.out.println("Shot on Target by: " + shotOnTargetBy);
+									            if(playerAttributesMap.containsKey(shotOnTargetBy)) {
+									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(shotOnTargetBy);
+									            	playerAttributeInfo.setShotsOnTarget(playerAttributeInfo.getShotsOnTarget() + 1);
+									            }
+									            
+									        }
+									        
+										}
+									}
+							        
+								}
+							} catch (SAXException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							
+						} catch (ParserConfigurationException e) {
+							e.printStackTrace();
+						}
+						
+						// calculate shotoff
+						try {
+							DocumentBuilder builder = factory.newDocumentBuilder();
+							InputSource is = new InputSource(new StringReader(shotoff));
+							
+							try {
+								Document doc = builder.parse(is);
+								NodeList noOfShotsOff = doc.getElementsByTagName("value");
+								
+								for (int i = 0; i < noOfShotsOff.getLength(); ++i)
+								{
+									Element allShotsOff = (Element) noOfShotsOff.item(i);
+									
+									NodeList shotsOffList = allShotsOff.getElementsByTagName("team");
+									for (int j = 0; j < shotsOffList.getLength(); ++j) {
+										Element gst = (Element) shotsOffList.item(j);
+										String shotsOffTeam = gst.getFirstChild().getNodeValue();
+										
+										if(shotsOffTeam.equalsIgnoreCase(homeTeamId)) {
+											
+											NodeList playersShotsOffList = allShotsOff.getElementsByTagName("player1");
+									        for (int k = 0; k < playersShotsOffList.getLength(); ++k)
+									        {
+									            Element gs = (Element) playersShotsOffList.item(k);
+									            String playerShotsOff = gs.getFirstChild().getNodeValue();
+									            System.out.println("Shot off target by: " + playerShotsOff);
+									            if(playerAttributesMap.containsKey(playerShotsOff)) {
+									            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(playerShotsOff);
+									            	playerAttributeInfo.setShotsOffTarget(playerAttributeInfo.getShotsOffTarget() + 1);
+									            }
+									            
+									        }
+									        
+										}
+									}
+							        
+								}
+							} catch (SAXException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							
+						} catch (ParserConfigurationException e) {
+							e.printStackTrace();
+						}
+						
+						
 					}
 					preparedStatement.close();
 				} catch (SQLException e) {
@@ -907,7 +1002,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			String key = entry.getKey();
 			System.out.println("Key: " + key);
 			PlayerAttributesInfo values = entry.getValue();
-			System.out.println("Values: " + values.getGoals() + " : " + values.getAssists() + " : " + values.getOverallRating());
+			System.out.println("Values: " + values.getGoals() + " : " + values.getAssists() + " : " + values.getOverallRating() + " : " + values.getShotsOnTarget() + " : " + values.getShotsOffTarget());
 		}
 		
 		return playerAttributesMap;
