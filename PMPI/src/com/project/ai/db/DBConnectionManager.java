@@ -3,7 +3,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.sqlite.SQLiteDataSource;
-import org.sqlite.SQLiteJDBCLoader;
 
 //Extend this class in all the IMPL class and implement the corresponding interface
 //Call getConnetion to access DB
@@ -12,8 +11,6 @@ public class DBConnectionManager {
 	private static Connection mDatabaseConnection = null;
 	private String dbPath = "";
 	private void setConnection() throws Exception{
-
-		boolean initialize = SQLiteJDBCLoader.initialize();
 
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setUrl("jdbc:sqlite:"+dbPath);

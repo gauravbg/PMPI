@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -167,11 +166,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	// Returns <teamId, [previousstandings 1 to howManyPrevSeasons]>
 	@Override
 	public HashMap<String, int[]> getPreviousStandingsAllOpponents(String teamId, String matchId,
-			int howManyPrevSeasons) {
+			int howManyPrevSeasons, String curSeason) {
 		HashMap<String, int[]> opponentsPreviousStandings = new HashMap<>();
 		ArrayList<String> opponents = getFutureOpponents(teamId, matchId);
-		//TODO: change current season later on
-		String curSeason = "2012/2013";
 		String[] currentSeasonHalves = curSeason.split("/");
 		int currentSeasonFirstHalf = Integer.valueOf(currentSeasonHalves[0]);
 		int currentSeasonSecondHalf = Integer.valueOf(currentSeasonHalves[1]);
@@ -228,7 +225,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	public HashMap<String, int[]> getStandingsOfSeason(String season) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
-		int goalsScored, goalsAgainst, goalDifference;
 
 		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
 				+ "From Match Where season = ? And league_id = ?;";
@@ -333,7 +329,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 	public HashMap<String, int[]> getStandingsOfSeasonForGameWeek(String season, String gameWeek) {
 		Connection connection = getConnection();
 		HashMap<String, int[]> standings = new HashMap<>();
-		int goalsScored, goalsAgainst, goalDifference;
 
 		String getStandingsQuery = "Select home_team_goal, away_team_goal, home_team_api_id, away_team_api_id "
 				+ "From Match Where season = ? And league_id = ? And stage < ?;";
@@ -497,7 +492,6 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			preparedStatement.setString(4, String.valueOf(inLastHowManyGames));
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
-				String match_id = resultSet.getString("match_api_id");
 				String home_team_api_id = resultSet.getString("home_team_api_id");
 				String away_team_api_id = resultSet.getString("away_team_api_id");
 

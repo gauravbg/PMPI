@@ -158,7 +158,7 @@ public class TeamStrengthCalculator {
 
 
 	private int getResidualMatchToughness(String teamId) {
-		HashMap<String, int[]> prevStandings = dbHelper.getPreviousStandingsAllOpponents(teamId, match.getMatchId(), 5);
+		HashMap<String, int[]> prevStandings = dbHelper.getPreviousStandingsAllOpponents(teamId, match.getMatchId(), 5, "2008/2009");
 		Iterator<Entry<String, int[]>> it = prevStandings.entrySet().iterator();
 		double totalOpponentScore = 0;
 		int oppCount = 0;

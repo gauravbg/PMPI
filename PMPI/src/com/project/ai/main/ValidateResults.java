@@ -141,6 +141,9 @@ public class ValidateResults extends DBConnectionManager {
 			e.printStackTrace();
 		}
 		
+		for(String player : importantPlayers)
+			System.out.println(player);
+		
 		return importantPlayers;
 	}
 
