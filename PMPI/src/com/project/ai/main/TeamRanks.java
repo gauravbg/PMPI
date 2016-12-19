@@ -22,7 +22,6 @@ public class TeamRanks {
 	
 	public static int getOpponentDifficultyRank(double score) {
 		
-		System.out.println("Opponent avg score: " + score);
 		if(score>18) {
 			return 1;
 		} else if(score>16) {
@@ -95,6 +94,89 @@ public class TeamRanks {
 		} else {
 			return 5;
 		}
+	}
+	
+	public static double getPositionLikelihood(String pos) {
+		double likelihood;
+		if(pos.equals("ATT")) {
+			likelihood = 0.6;
+		} else if(pos.equals("MID")) {
+			likelihood = 0.25;
+		} else if (pos.equals("DEF")) {
+			likelihood = 0.15;
+		} else {
+			likelihood = 0;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleGoal(int goals) {
+		double likelihood;
+		if(goals > 5) {
+			likelihood = 0.95;
+		} else if(goals > 4) {
+			likelihood = 0.8;
+		} else if (goals > 3) {
+			likelihood = 0.6;
+		} else if (goals > 2){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleAssists(int ass) {
+		double likelihood;
+		if(ass > 5) {
+			likelihood = 0.95;
+		} else if(ass > 4) {
+			likelihood = 0.8;
+		} else if (ass > 3) {
+			likelihood = 0.6;
+		} else if (ass > 2){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleShotsOnTarget(int count) {
+		double likelihood;
+		if(count > 10) {
+			likelihood = 0.95;
+		} else if(count > 8) {
+			likelihood = 0.8;
+		} else if (count > 6) {
+			likelihood = 0.6;
+		} else if (count > 4){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleShotsOffTarget(int count) {
+		double likelihood;
+		if(count > 10) {
+			likelihood = 0.95;
+		} else if(count > 8) {
+			likelihood = 0.8;
+		} else if (count > 6) {
+			likelihood = 0.6;
+		} else if (count > 4){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
 	}
 	
 	public static double[] getMeanSDAfterPlayerReturn(double meanSD, int noOfPlayerReturning) {
