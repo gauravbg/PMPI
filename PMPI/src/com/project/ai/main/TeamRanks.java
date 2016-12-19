@@ -221,6 +221,7 @@ public class TeamRanks {
 
 	public static double[] getTeamScores(double[] strength, double[] form) {
 		
+		
 		double[] score = new double[2];
 		score[0] = strength[0] * 0.35 + form[0] * 0.65;
 		score[1] = strength[1] * 0.35 + form[1] * 0.65;
