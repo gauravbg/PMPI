@@ -519,7 +519,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 							playersPlayedRecently.add(playerInfo);
 						} else {
 							for(PlayerInfo player : playersPlayedRecently) {
-								if(player.getPlayerId().equals(playerInfo.getPlayerId())) {
+								String pid = player.getPlayerId();
+								if(player !=null && pid!=null)
+								if(pid.equals(playerInfo.getPlayerId())) {
 									isPresent = true;
 								}
 							}
@@ -720,10 +722,15 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					StringBuilder column = new StringBuilder(homeBaseColumnName);
 					String columnName = column.append(i).toString();
 					String resultPlayerId = resultSet.getString(columnName);
-					if(resultPlayerId.equals(playerId)) {
-						pos = i;
-						gameType = "home";
+					try {
+						if(resultPlayerId.equals(playerId)) {
+							pos = i;
+							gameType = "home";
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
 					}
+					
 				}
 
 				for(int i = 1; i <= 11; i++){

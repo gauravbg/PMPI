@@ -242,7 +242,8 @@ public class ValidateResults extends DBConnectionManager {
 			matchDetails.setHomeTeamId(actualResult.getHomeTeamId());
 			matchDetails.setAwayTeamId(actualResult.getAwayTeamId());
 			// TODO Return Predicted result here 
-			// predictedResult = getPredictedResult(matchDetails);
+			PMPIBayesianNetwork network = new PMPIBayesianNetwork(matchDetails, season, gameweek);
+			 predictedResult = network.predict();
 			
 			totalMatchesPredicted += 1;
 			
@@ -261,12 +262,14 @@ public class ValidateResults extends DBConnectionManager {
 			}
 		}
 		
-		percentCorrectMatches = (correctMatchesPredicted / totalMatchesPredicted) * 100;
-		percentCorrectPlayers = (correctPlayersPredicted / totalPlayersPredicted) * 100;
-//		System.out.println("Total Matches Predicted on: " + totalMatchesPredicted);
-//		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectMatches);
-//		System.out.println("-------------------------------------------");
-//		System.out.println("Total Players predicted on: " + totalPlayersPredicted);
-//		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectPlayers);
+		double correctness= ((double)correctMatchesPredicted / totalMatchesPredicted); 
+		double plyrCorrectness = ((double)correctPlayersPredicted / totalPlayersPredicted);
+		percentCorrectMatches = correctness * 100;
+		percentCorrectPlayers = plyrCorrectness * 100;
+		System.out.println("Total Matches Predicted on: " + totalMatchesPredicted);
+		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectMatches);
+		System.out.println("-------------------------------------------");
+		System.out.println("Total Players predicted on: " + totalPlayersPredicted);
+		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectPlayers);
 	}
 }

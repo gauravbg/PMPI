@@ -198,5 +198,33 @@ public class TeamRanks {
 		
 		return a;
 	}
+	
+	public static int getTotalPoints(int first, int second, int matches) {
+		
+		int total = 0;
+		if(matches>30) {
+			total = (int) (first * 0.8 + second * 0.2);
+		} else if(matches>25) {
+			total = (int) (first * 0.7 + second * 0.3);
+		} else if(matches>20) {
+			total = (int) (first * 0.6 + second * 0.4);
+		} else if(matches>15) {
+			total = (int) (first * 0.5 + second * 0.5);
+		} else if(matches>10) {
+			total = (int) (first * 0.4 + second * 0.6);
+		} else {
+			total = (int) (first * 0.3 + second * 0.7);
+		}
+		
+		return total;
+	}
+
+	public static double[] getTeamScores(double[] strength, double[] form) {
+		
+		double[] score = new double[2];
+		score[0] = strength[0] * 0.35 + form[0] * 0.65;
+		score[1] = strength[1] * 0.35 + form[1] * 0.65;
+		return score;
+	}
 
 }

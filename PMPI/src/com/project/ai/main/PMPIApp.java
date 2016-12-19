@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import com.project.ai.dataclasses.MatchInfo;
 import com.project.ai.dataclasses.PlayerInfo;
+import com.project.ai.dataclasses.TestMatchResultsInfo;
 import com.project.ai.db.DatabaseHelper;
 
 public class PMPIApp {
@@ -20,12 +21,15 @@ public class PMPIApp {
 		
 		if(args[1].equals("TEST")) {
 			System.out.println("IN TEST MODE:");
-			//TestDriver testdriver = new TestDriver();
-			//testdriver.testDBQueries(args[0]);
-			ValidateResults valResults = new ValidateResults();
-			valResults.setDatabasePath(args[0]);
-			valResults.getPlayersWhoScoredOrAssisted("489132", "10260");
+//			//TestDriver testdriver = new TestDriver();
+//			//testdriver.testDBQueries(args[0]);
+//			ValidateResults valResults = new ValidateResults();
+//			valResults.setDatabasePath(args[0]);
+//			valResults.getPlayersWhoScoredOrAssisted("489132", "10260");
 			//valResults.computeActualResults("37", "2008/2009");
+			ValidateResults results = new ValidateResults();
+			results.setDatabasePath(args[0]);
+			results.compareResults("37", "2015/2016");
 			
 		} else {
 		
@@ -63,8 +67,21 @@ public class PMPIApp {
 			System.out.println("------------------------------------------------------------------");
 			System.out.println("Predicting for " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
 			PMPIBayesianNetwork bayesNet = new PMPIBayesianNetwork(matches.get(match-1), season, gw);
-			bayesNet.predict();
-			//System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+			TestMatchResultsInfo results  = bayesNet.predict();
+			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+			for(int i=results.getListOfInfluentialPlayers().size()-1; i>=0; i--) {
+				ArrayList<String> allPlayers = results.getListOfInfluentialPlayers();
+				for(int j=0; i<homePlayers.size() ;i++) {
+					String id = homePlayers.get(j).getPlayerId();
+					String id1 = awayPlayers.get(j).getPlayerId();
+					if(id.equals(allPlayers.get(i))) {
+						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
+					}
+					if(id1.equals(allPlayers.get(i))) {
+						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
+					}
+				}
+			}
 			
 			in.close();
 
