@@ -99,11 +99,11 @@ public class TeamRanks {
 	public static double getPositionLikelihood(String pos) {
 		double likelihood;
 		if(pos.equals("ATT")) {
-			likelihood = 0.6;
+			likelihood = 0.68;
 		} else if(pos.equals("MID")) {
-			likelihood = 0.25;
+			likelihood = 0.27;
 		} else if (pos.equals("DEF")) {
-			likelihood = 0.15;
+			likelihood = 0.05;
 		} else {
 			likelihood = 0;
 		}
@@ -221,10 +221,9 @@ public class TeamRanks {
 
 	public static double[] getTeamScores(double[] strength, double[] form) {
 		
-		
 		double[] score = new double[2];
-		score[0] = strength[0] * 0.35 + form[0] * 0.65;
-		score[1] = strength[1] * 0.35 + form[1] * 0.65;
+		score[0] = strength[0] * 0.45 + form[0] * 0.55;
+		score[1] = strength[1] * 0.45 + form[1] * 0.55;
 		return score;
 	}
 

@@ -43,8 +43,8 @@ public class PMPIBayesianNetwork {
 		double[] teamStrengthScores = getTeamStrength();
 		double[] teamFormScores = getTeamForm();
 		double[] teamScores = TeamRanks.getTeamScores(teamStrengthScores, teamFormScores);
-		double winProbabalityForAwayTeam = teamScores[0];
-		double winProbabalityForHomeTeam = teamScores[1];
+		double winProbabalityForAwayTeam = teamScores[1];
+		double winProbabalityForHomeTeam = teamScores[0];
 		ArrayList<Player> allPlayers = getPlayerPerformnce(teamScores[0], teamScores[1]);
 		ArrayList<String> rankedPlayers = new ArrayList<>();
 		for(int i=0; i<allPlayers.size(); i++) {
@@ -187,7 +187,7 @@ public class PMPIBayesianNetwork {
 		System.out.println("homeScore: " + homeScore);
 		System.out.println("awayScore: " + awayScore);
 		
-		double[] scores = {Math.min(1, homeTotal/100), Math.min(1, awayTotal/100)};
+		double[] scores = {Math.min(1, (double)homeTotal/100), Math.min(1, (double)awayTotal/100)};
 		return scores;
 	}
 	
@@ -221,7 +221,6 @@ public class PMPIBayesianNetwork {
 						break;
 					}
 				} catch (Exception e) {
-					System.out.println("****************NullPointerException");
 				}
 			}
 			
@@ -237,10 +236,15 @@ public class PMPIBayesianNetwork {
 			String player = scorersAway.get(i);
 			boolean playerFound = false;
 			for(int j=0; j<nextAwayPlayers.size(); j++) {
-				if(nextAwayPlayers.get(j).getPlayerId().equals(player)) {
-					playerFound = true;
-					break;
+
+				try {
+					if(nextAwayPlayers.get(j).getPlayerId().equals(player)) {
+						playerFound = true;
+						break;
+					}
+				} catch (Exception e) {
 				}
+				
 			}
 			
 			if(!playerFound) {
@@ -282,12 +286,12 @@ public class PMPIBayesianNetwork {
 		ArrayList<Player> allPlayers = new ArrayList<>();
 		allPlayers.addAll(homePlayers);
 		allPlayers.addAll(awayPlayers);
-		Collections.sort(awayPlayers, new Comparator<Player>() {
+		Collections.sort(allPlayers, new Comparator<Player>() {
 			@Override
 			public int compare(Player arg0, Player arg1) {
-				if(arg0.score > arg1.score)
+				if(arg0.score < arg1.score)
 					return 1;
-				else if(arg0.score < arg1.score)
+				else if(arg0.score > arg1.score)
 					return -1;
 				else
 					return 0;
@@ -304,7 +308,7 @@ public class PMPIBayesianNetwork {
 		double playerForm = getPlayerForm(playerStats);
 		double pos = TeamRanks.getPositionLikelihood(playerStats.getPosition());
 		double rating = (double)playerStats.getOverallRating()/100; 
-		double score = 0.4 * teamStrength + 0.3 * pos + 0.2* playerForm + 0.1 *(rating-0.2);
+		double score = 0.3 * teamStrength + 0.31 * pos + 0.29* playerForm + 0.1 *(rating);
 		System.out.printf("Score: %.3f ", score);
 		System.out.print(" | ");
 		System.out.printf("%.3f",teamStrength);
@@ -386,15 +390,16 @@ public class PMPIBayesianNetwork {
 	    Collections.sort(sortedAwayPlayers, new Comparator<Player>() {
 			@Override
 			public int compare(Player arg0, Player arg1) {
-				return arg0.rating.compareTo(arg1.rating);
+				return arg1.rating.compareTo(arg0.rating);
 			}
 	    });
 	    Collections.sort(sortedHomePlayers, new Comparator<Player>() {
 			@Override
 			public int compare(Player arg0, Player arg1) {
-				return arg0.rating.compareTo(arg1.rating);
+				return arg1.rating.compareTo(arg0.rating);
 			}
 	    });
+	    
 		
 		ArrayList<PlayerInfo> nextHomepPlayers = dbHelper.getAllPlayers(match.getHomeTeamId(), match.getMatchId());
 		ArrayList<PlayerInfo> nextAwayPlayers = dbHelper.getAllPlayers(match.getAwayTeamId(), match.getMatchId());
@@ -420,10 +425,16 @@ public class PMPIBayesianNetwork {
 		for(int i=0; i<11; i++) {
 			String playerId = sortedAwayPlayers.get(i).id;
 			for(int j=0; j<11; j++) {
-				if(nextAwayPlayers.get(j).getPlayerId().equals(playerId)) {
-					awayPLayersPlaying++;
-					break;
+				try {
+				
+					if(nextAwayPlayers.get(j).getPlayerId().equals(playerId)) {
+						awayPLayersPlaying++;
+						break;
+					}
+				} catch (Exception e) {
+					// TODO: handle exception
 				}
+				
 			}
 		}
 		
@@ -461,7 +472,6 @@ public class PMPIBayesianNetwork {
 					homePlayersReturning++;
 				}
 			} catch (NullPointerException e) {
-				System.out.println("****************NullPointerException");
 			}
 			
 			
@@ -488,7 +498,7 @@ public class PMPIBayesianNetwork {
 		System.out.println("awayMeanSDAftReturn: " + awayMeanSDAftReturn[0] + "," +awayMeanSDAftReturn[1]);
 		
 		
-		double[] formScores = {homeMeanSDAftReturn[0], homeMeanSDAftReturn[1]};
+		double[] formScores = {homeMeanSDAftReturn[0], homeMeanSDAftReturn[0]};
 		return formScores;
 	
 	}

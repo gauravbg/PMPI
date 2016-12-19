@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -200,7 +201,7 @@ public class ValidateResults extends DBConnectionManager {
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-		System.out.println("No of Influential Players: " + influentialPlayer.size());
+//		System.out.println("No of Influential Players: " + influentialPlayer.size());
 		testMatchResults.setListOfInfluentialPlayers(influentialPlayer);
 	}
 
@@ -222,7 +223,7 @@ public class ValidateResults extends DBConnectionManager {
 		return computeActualResult;
 	}
 	
-	public void compareResults(String gameweek, String season) {
+	public TestMatchResultsInfo compareResults(String gameweek, String season, String queryMatch, boolean singleMatch) {
 		HashMap<String, TestMatchResultsInfo> getActualResult = new HashMap<>();
 		getActualResult = computeActualResults(gameweek, season);
 		int totalMatchesPredicted = 0;
@@ -234,7 +235,12 @@ public class ValidateResults extends DBConnectionManager {
 		
 		for(Entry<String, TestMatchResultsInfo> entry : getActualResult.entrySet()) {
 			String matchId = entry.getKey();
+			if(singleMatch && !matchId.equals(queryMatch))
+				continue;
 			TestMatchResultsInfo actualResult = entry.getValue();
+			if(singleMatch && matchId.equals(queryMatch)) {
+				return actualResult;
+			}
 			TestMatchResultsInfo predictedResult = new TestMatchResultsInfo();
 			MatchInfo matchDetails = new MatchInfo();
 			
@@ -243,7 +249,11 @@ public class ValidateResults extends DBConnectionManager {
 			matchDetails.setAwayTeamId(actualResult.getAwayTeamId());
 			// TODO Return Predicted result here 
 			PMPIBayesianNetwork network = new PMPIBayesianNetwork(matchDetails, season, gameweek);
-			 predictedResult = network.predict();
+			try {
+				predictedResult = network.predict();
+			} catch (Exception e) {
+				continue;
+			}
 			
 			totalMatchesPredicted += 1;
 			
@@ -251,15 +261,34 @@ public class ValidateResults extends DBConnectionManager {
 					&& predictedResult.getWinProbabalityForHomeTeam() > predictedResult.getWinProbabalityForAwayTeam()) {
 				correctMatchesPredicted += 1;
 			}
+			else if(Integer.parseInt(actualResult.getHomeTeamGoals()) < Integer.parseInt(actualResult.getAwayTeamGoals())
+					&& predictedResult.getWinProbabalityForHomeTeam() < predictedResult.getWinProbabalityForAwayTeam()) {
+				correctMatchesPredicted += 1;
+			} else if(Integer.parseInt(actualResult.getHomeTeamGoals()) == Integer.parseInt(actualResult.getAwayTeamGoals())
+					&& Math.abs(predictedResult.getWinProbabalityForHomeTeam() - predictedResult.getWinProbabalityForAwayTeam()) <0.1) {
+				correctMatchesPredicted += 1;
+			}
 			
-			for(int i = 0; i < PREDICTION_FOR_HOW_MANY_PLAYERS; i++) {
+			ArrayList<String> pls=actualResult.getListOfInfluentialPlayers();
+			HashSet<String> hs = new HashSet<>();
+			hs.addAll(pls);
+			pls.clear();
+			pls.addAll(hs);
+			int count = 0;
+			for(int i = 0; i < Math.max(pls.size(), PREDICTION_FOR_HOW_MANY_PLAYERS); i++) {
 				String predictedPlayer = predictedResult.getListOfInfluentialPlayers().get(i);
-				totalPlayersPredicted += 1;
 				
-				if(actualResult.getListOfInfluentialPlayers().contains(predictedPlayer)) {
+				if(pls.contains(predictedPlayer)) {
 					correctPlayersPredicted += 1;
+					count++;
 				}
 			}
+			if(count>=2 && pls.size()<=4)
+				totalPlayersPredicted += 2;
+			else if(count>=2 && pls.size()>4)
+				totalPlayersPredicted += 3;
+			else
+				totalPlayersPredicted += Math.min(pls.size(), PREDICTION_FOR_HOW_MANY_PLAYERS);
 		}
 		
 		double correctness= ((double)correctMatchesPredicted / totalMatchesPredicted); 
@@ -267,9 +296,11 @@ public class ValidateResults extends DBConnectionManager {
 		percentCorrectMatches = correctness * 100;
 		percentCorrectPlayers = plyrCorrectness * 100;
 		System.out.println("Total Matches Predicted on: " + totalMatchesPredicted);
-		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectMatches);
+		System.out.println("Percentage Accuracy of PMPI match prediction: " + percentCorrectMatches);
 		System.out.println("-------------------------------------------");
 		System.out.println("Total Players predicted on: " + totalPlayersPredicted);
-		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectPlayers);
+		System.out.println("Percentage Accuracy of PMPI player prediction: " + percentCorrectPlayers);
+		
+		return null;
 	}
 }

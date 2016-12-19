@@ -1,5 +1,6 @@
 package com.project.ai.main;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import com.project.ai.dataclasses.MatchInfo;
@@ -29,7 +30,7 @@ public class PMPIApp {
 			//valResults.computeActualResults("37", "2008/2009");
 			ValidateResults results = new ValidateResults();
 			results.setDatabasePath(args[0]);
-			results.compareResults("37", "2015/2016");
+			results.compareResults("7", "2015/2016", "", false);
 			
 		} else {
 		
@@ -68,20 +69,53 @@ public class PMPIApp {
 			System.out.println("Predicting for " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
 			PMPIBayesianNetwork bayesNet = new PMPIBayesianNetwork(matches.get(match-1), season, gw);
 			TestMatchResultsInfo results  = bayesNet.predict();
-//			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
-//			for(int i=results.getListOfInfluentialPlayers().size()-1; i>=0; i--) {
-//				ArrayList<String> allPlayers = results.getListOfInfluentialPlayers();
-//				for(int j=0; i<homePlayers.size() ;i++) {
-//					String id = homePlayers.get(j).getPlayerId();
-//					String id1 = awayPlayers.get(j).getPlayerId();
-//					if(id.equals(allPlayers.get(i))) {
-//						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
-//					}
-//					if(id1.equals(allPlayers.get(i))) {
-//						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
-//					}
-//				}
-//			}
+			System.out.println();
+			System.out.println();
+			System.out.println(matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+			System.out.println("****************************PREDICTED RESULT**********************************");
+			System.out.println("Influential players: ");
+			ArrayList<String> players = results.getListOfInfluentialPlayers();
+			for(int i=0; i<5; i++) {
+				String pid = players.get(i);
+				for(int j=0; j<homePlayers.size() ;j++) {
+					String id = homePlayers.get(j).getPlayerId();
+					String id1 = awayPlayers.get(j).getPlayerId();
+					if(id.equals(pid)) {
+						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
+					}
+					if(id1.equals(pid)) {
+						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
+					}
+				}
+			}
+			
+			System.out.println("PMPI Score " +matches.get(match-1).getHomeTeamLongName() + ": "  + results.getWinProbabalityForHomeTeam());
+			System.out.println("PMPI Score " +matches.get(match-1).getAwayTeamLongName() + ": "  + results.getWinProbabalityForAwayTeam());
+			System.out.println("****************************ACTUAL RESULT**********************************");
+			ValidateResults actualResultsGen = new ValidateResults();
+			int prevGw = Integer.parseInt(gw)-1;
+			TestMatchResultsInfo actualResults= actualResultsGen.compareResults(Integer.toString(prevGw), "2015/2016", matches.get(match-1).getMatchId(), true);
+			ArrayList<String> pls =actualResults.getListOfInfluentialPlayers();
+			System.out.println("Players who scored or assisted: ");
+			HashSet<String> hs = new HashSet<>();
+			hs.addAll(pls);
+			pls.clear();
+			pls.addAll(hs);
+			for(int i=0; i<pls.size();i++) {
+				String pid = pls.get(i);
+				for(int j=0; j<homePlayers.size() ;j++) {
+					String id = homePlayers.get(j).getPlayerId();
+					String id1 = awayPlayers.get(j).getPlayerId();
+					if(id.equals(pid)) {
+						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
+					}
+					if(id1.equals(pid)) {
+						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
+					}
+				}
+			}
+			System.out.println("Actual Score " +matches.get(match-1).getHomeTeamLongName() + ": "  + actualResults.getHomeTeamGoals());
+			System.out.println("Actual Score " +matches.get(match-1).getAwayTeamLongName() + ": "  + actualResults.getAwayTeamGoals());
 			
 			in.close();
 
