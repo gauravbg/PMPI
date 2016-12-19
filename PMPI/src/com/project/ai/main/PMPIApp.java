@@ -68,20 +68,20 @@ public class PMPIApp {
 			System.out.println("Predicting for " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
 			PMPIBayesianNetwork bayesNet = new PMPIBayesianNetwork(matches.get(match-1), season, gw);
 			TestMatchResultsInfo results  = bayesNet.predict();
-			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
-			for(int i=results.getListOfInfluentialPlayers().size()-1; i>=0; i--) {
-				ArrayList<String> allPlayers = results.getListOfInfluentialPlayers();
-				for(int j=0; i<homePlayers.size() ;i++) {
-					String id = homePlayers.get(j).getPlayerId();
-					String id1 = awayPlayers.get(j).getPlayerId();
-					if(id.equals(allPlayers.get(i))) {
-						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
-					}
-					if(id1.equals(allPlayers.get(i))) {
-						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
-					}
-				}
-			}
+//			System.out.println("Likely players to score in " + matches.get(match-1).getHomeTeamLongName() + " VS " + matches.get(match-1).getAwayTeamLongName() + ": ");
+//			for(int i=results.getListOfInfluentialPlayers().size()-1; i>=0; i--) {
+//				ArrayList<String> allPlayers = results.getListOfInfluentialPlayers();
+//				for(int j=0; i<homePlayers.size() ;i++) {
+//					String id = homePlayers.get(j).getPlayerId();
+//					String id1 = awayPlayers.get(j).getPlayerId();
+//					if(id.equals(allPlayers.get(i))) {
+//						System.out.println("" + (i+1)+". " + homePlayers.get(j).getPlayerName());						
+//					}
+//					if(id1.equals(allPlayers.get(i))) {
+//						System.out.println("" + (i+1)+". " + awayPlayers.get(j).getPlayerName());						
+//					}
+//				}
+//			}
 			
 			in.close();
 
