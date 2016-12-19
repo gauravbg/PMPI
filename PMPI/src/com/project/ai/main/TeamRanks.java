@@ -22,7 +22,6 @@ public class TeamRanks {
 	
 	public static int getOpponentDifficultyRank(double score) {
 		
-		System.out.println("Opponent avg score: " + score);
 		if(score>18) {
 			return 1;
 		} else if(score>16) {
@@ -97,6 +96,89 @@ public class TeamRanks {
 		}
 	}
 	
+	public static double getPositionLikelihood(String pos) {
+		double likelihood;
+		if(pos.equals("ATT")) {
+			likelihood = 0.6;
+		} else if(pos.equals("MID")) {
+			likelihood = 0.25;
+		} else if (pos.equals("DEF")) {
+			likelihood = 0.15;
+		} else {
+			likelihood = 0;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleGoal(int goals) {
+		double likelihood;
+		if(goals > 5) {
+			likelihood = 0.95;
+		} else if(goals > 4) {
+			likelihood = 0.8;
+		} else if (goals > 3) {
+			likelihood = 0.6;
+		} else if (goals > 2){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleAssists(int ass) {
+		double likelihood;
+		if(ass > 5) {
+			likelihood = 0.95;
+		} else if(ass > 4) {
+			likelihood = 0.8;
+		} else if (ass > 3) {
+			likelihood = 0.6;
+		} else if (ass > 2){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleShotsOnTarget(int count) {
+		double likelihood;
+		if(count > 10) {
+			likelihood = 0.95;
+		} else if(count > 8) {
+			likelihood = 0.8;
+		} else if (count > 6) {
+			likelihood = 0.6;
+		} else if (count > 4){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
+	public static double scaleShotsOffTarget(int count) {
+		double likelihood;
+		if(count > 10) {
+			likelihood = 0.95;
+		} else if(count > 8) {
+			likelihood = 0.8;
+		} else if (count > 6) {
+			likelihood = 0.6;
+		} else if (count > 4){
+			likelihood = 0.4;
+		} else {
+			likelihood = 0.3;
+		}
+		
+		return likelihood;
+	}
+	
 	public static double[] getMeanSDAfterPlayerReturn(double meanSD, int noOfPlayerReturning) {
 		double[] a = new double[2];
 		
@@ -115,6 +197,34 @@ public class TeamRanks {
 		} 
 		
 		return a;
+	}
+	
+	public static int getTotalPoints(int first, int second, int matches) {
+		
+		int total = 0;
+		if(matches>30) {
+			total = (int) (first * 0.8 + second * 0.2);
+		} else if(matches>25) {
+			total = (int) (first * 0.7 + second * 0.3);
+		} else if(matches>20) {
+			total = (int) (first * 0.6 + second * 0.4);
+		} else if(matches>15) {
+			total = (int) (first * 0.5 + second * 0.5);
+		} else if(matches>10) {
+			total = (int) (first * 0.4 + second * 0.6);
+		} else {
+			total = (int) (first * 0.3 + second * 0.7);
+		}
+		
+		return total;
+	}
+
+	public static double[] getTeamScores(double[] strength, double[] form) {
+		
+		double[] score = new double[2];
+		score[0] = strength[0] * 0.35 + form[0] * 0.65;
+		score[1] = strength[1] * 0.35 + form[1] * 0.65;
+		return score;
 	}
 
 }

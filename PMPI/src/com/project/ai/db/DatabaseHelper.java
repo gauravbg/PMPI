@@ -110,7 +110,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("All matches size: " + allMatches.size());
+//		System.out.println("All matches size: " + allMatches.size());
 		return allMatches;
 	}
 
@@ -421,10 +421,10 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			result.put( entry.getKey(), entry.getValue() );
 		}
 
-		for (Map.Entry<String, int[]> entry : rank)
-		{
-			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[1] );
-		} 
+//		for (Map.Entry<String, int[]> entry : rank)
+//		{
+//			System.out.println(entry.getKey() + " : " + entry.getValue()[0] + " : " + entry.getValue()[1] );
+//		} 
 
 		return (HashMap<String, int[]>) result;
 	}
@@ -519,7 +519,9 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 							playersPlayedRecently.add(playerInfo);
 						} else {
 							for(PlayerInfo player : playersPlayedRecently) {
-								if(player.getPlayerId().equals(playerInfo.getPlayerId())) {
+								String pid = player.getPlayerId();
+								if(player !=null && pid!=null)
+								if(pid.equals(playerInfo.getPlayerId())) {
 									isPresent = true;
 								}
 							}
@@ -720,10 +722,15 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					StringBuilder column = new StringBuilder(homeBaseColumnName);
 					String columnName = column.append(i).toString();
 					String resultPlayerId = resultSet.getString(columnName);
-					if(resultPlayerId.equals(playerId)) {
-						pos = i;
-						gameType = "home";
+					try {
+						if(resultPlayerId.equals(playerId)) {
+							pos = i;
+							gameType = "home";
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
 					}
+					
 				}
 
 				for(int i = 1; i <= 11; i++){
@@ -767,7 +774,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Pos: " + position);
+//		System.out.println("Pos: " + position);
 		return position;
 	}
 	
@@ -797,7 +804,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					        {
 					            Element gs = (Element) goalScorerList.item(k);
 					            String goalScorer = gs.getFirstChild().getNodeValue();
-					            System.out.println("Goal scorer is: " + goalScorer);
+//					            System.out.println("Goal scorer is: " + goalScorer);
 					            if(playerAttributesMap.containsKey(goalScorer)) {
 					            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(goalScorer);
 					            	playerAttributeInfo.setGoals(playerAttributeInfo.getGoals() + 1);
@@ -809,7 +816,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 					        {
 					            Element as = (Element) assisterList.item(k);
 					            String assister = as.getFirstChild().getNodeValue();
-					            System.out.println("Assister is: " + assister);
+//					            System.out.println("Assister is: " + assister);
 					            if(playerAttributesMap.containsKey(assister)) {
 					            	PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(assister);
 					            	playerAttributeInfo.setAssists(playerAttributeInfo.getAssists() + 1);
@@ -859,7 +866,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 							{
 								Element gs = (Element) shotsOnTargetList.item(k);
 								String shotOnTargetBy = gs.getFirstChild().getNodeValue();
-								System.out.println("Shot on Target by: " + shotOnTargetBy);
+//								System.out.println("Shot on Target by: " + shotOnTargetBy);
 								if(playerAttributesMap.containsKey(shotOnTargetBy)) {
 									PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(shotOnTargetBy);
 									playerAttributeInfo.setShotsOnTarget(playerAttributeInfo.getShotsOnTarget() + 1);
@@ -908,7 +915,7 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 							{
 								Element gs = (Element) playersShotsOffList.item(k);
 								String playerShotsOff = gs.getFirstChild().getNodeValue();
-								System.out.println("Shot off target by: " + playerShotsOff);
+//								System.out.println("Shot off target by: " + playerShotsOff);
 								if(playerAttributesMap.containsKey(playerShotsOff)) {
 									PlayerAttributesInfo playerAttributeInfo = playerAttributesMap.get(playerShotsOff);
 									playerAttributeInfo.setShotsOffTarget(playerAttributeInfo.getShotsOffTarget() + 1);
@@ -983,11 +990,11 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						String shoton = resultSet.getString("shoton");
 						String shotoff = resultSet.getString("shotoff");
 						
-						System.out.println("Stats for Home Team");
+//						System.out.println("Stats for Home Team");
 						getGoalsAndAssists(goal, homeTeamId, playerAttributesMap);
 						getShotsOnTarget(shoton, homeTeamId, playerAttributesMap);
 						getShotsOffTarget(shotoff, homeTeamId, playerAttributesMap);
-						System.out.println("-------------------------------------------");
+//						System.out.println("-------------------------------------------");
 						
 					}
 					homeTeamPreparedStatement.close();
@@ -1009,12 +1016,12 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 						String shoton = resultSet.getString("shoton");
 						String shotoff = resultSet.getString("shotoff");
 						
-						System.out.println();
-						System.out.println("Stats for Away Team");
+//						System.out.println();
+//						System.out.println("Stats for Away Team");
 						getGoalsAndAssists(goal, awayTeamId, playerAttributesMap);
 						getShotsOnTarget(shoton, awayTeamId, playerAttributesMap);
 						getShotsOffTarget(shotoff, awayTeamId, playerAttributesMap);
-						System.out.println("---------------------------------------------");
+//						System.out.println("---------------------------------------------");
 						
 					}
 					awayTeamPreparedStatement.close();
@@ -1028,13 +1035,13 @@ public class DatabaseHelper extends DBConnectionManager implements IBasicTeamsIn
 			e.printStackTrace();
 		}
 		
-		System.out.println("Player Attributes map size: " + playerAttributesMap.size());
+//		System.out.println("Player Attributes map size: " + playerAttributesMap.size());
 		for (Entry<String, PlayerAttributesInfo> entry : playerAttributesMap.entrySet()) {
-			System.out.println("-------------------------------");
+//			System.out.println("-------------------------------");
 			String key = entry.getKey();
-			System.out.println("Key: " + key);
+//			System.out.println("Key: " + key);
 			PlayerAttributesInfo values = entry.getValue();
-			System.out.println("Values: " + values.getGoals() + " : " + values.getAssists() + " : " + values.getOverallRating() + " : " + values.getShotsOnTarget() + " : " + values.getShotsOffTarget());
+//			System.out.println("Values: " + values.getGoals() + " : " + values.getAssists() + " : " + values.getOverallRating() + " : " + values.getShotsOnTarget() + " : " + values.getShotsOffTarget());
 		}
 		
 		return playerAttributesMap;

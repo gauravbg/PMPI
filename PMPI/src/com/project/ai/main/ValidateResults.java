@@ -76,7 +76,7 @@ public class ValidateResults extends DBConnectionManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Actual results size: " + getActualResults.size());
+		//System.out.println("Actual results size: " + getActualResults.size());
 	}
 	
 	public ArrayList<String> getPlayersWhoScoredOrAssisted(String matchId, String teamId) {
@@ -120,7 +120,7 @@ public class ValidateResults extends DBConnectionManager {
 							        {
 							            Element gs = (Element) goalScorerList.item(k);
 							            String goalScorer = gs.getFirstChild().getNodeValue();
-							            System.out.println("Goal scorer is: " + goalScorer);
+//							            System.out.println("Goal scorer is: " + goalScorer);
 							            importantPlayers.add(goalScorer);
 							        }
 							        NodeList assisterList = allGoals.getElementsByTagName("player2");
@@ -128,7 +128,7 @@ public class ValidateResults extends DBConnectionManager {
 							        {
 							            Element as = (Element) assisterList.item(k);
 							            String assister = as.getFirstChild().getNodeValue();
-							            System.out.println("Assister is: " + assister);
+//							            System.out.println("Assister is: " + assister);
 							            importantPlayers.add(assister);
 							        }
 							        
@@ -151,8 +151,8 @@ public class ValidateResults extends DBConnectionManager {
 			e.printStackTrace();
 		}
 		
-		for(String player : importantPlayers)
-			System.out.println(player);
+//		for(String player : importantPlayers)
+//			System.out.println(player);
 		
 		return importantPlayers;
 	}
@@ -178,7 +178,7 @@ public class ValidateResults extends DBConnectionManager {
 					{
 						Element gs = (Element) goalScorerList.item(k);
 						String goalScorer = gs.getFirstChild().getNodeValue();
-						System.out.println("Goal scorer is: " + goalScorer);
+						//System.out.println("Goal scorer is: " + goalScorer);
 						influentialPlayer.add(goalScorer);
 
 					}
@@ -187,7 +187,7 @@ public class ValidateResults extends DBConnectionManager {
 					{
 						Element as = (Element) assisterList.item(k);
 						String assister = as.getFirstChild().getNodeValue();
-						System.out.println("Assister is: " + assister);
+						//System.out.println("Assister is: " + assister);
 						influentialPlayer.add(assister);
 					}
 				}
@@ -242,7 +242,8 @@ public class ValidateResults extends DBConnectionManager {
 			matchDetails.setHomeTeamId(actualResult.getHomeTeamId());
 			matchDetails.setAwayTeamId(actualResult.getAwayTeamId());
 			// TODO Return Predicted result here 
-			// predictedResult = getPredictedResult(matchDetails);
+			PMPIBayesianNetwork network = new PMPIBayesianNetwork(matchDetails, season, gameweek);
+			 predictedResult = network.predict();
 			
 			totalMatchesPredicted += 1;
 			
@@ -261,8 +262,10 @@ public class ValidateResults extends DBConnectionManager {
 			}
 		}
 		
-		percentCorrectMatches = (correctMatchesPredicted / totalMatchesPredicted) * 100;
-		percentCorrectPlayers = (correctPlayersPredicted / totalPlayersPredicted) * 100;
+		double correctness= ((double)correctMatchesPredicted / totalMatchesPredicted); 
+		double plyrCorrectness = ((double)correctPlayersPredicted / totalPlayersPredicted);
+		percentCorrectMatches = correctness * 100;
+		percentCorrectPlayers = plyrCorrectness * 100;
 		System.out.println("Total Matches Predicted on: " + totalMatchesPredicted);
 		System.out.println("Percentage Accuracy of PMPI: " + percentCorrectMatches);
 		System.out.println("-------------------------------------------");
