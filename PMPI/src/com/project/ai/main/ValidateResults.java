@@ -99,32 +99,42 @@ public class ValidateResults extends DBConnectionManager {
 				try {
 					DocumentBuilder builder = factory.newDocumentBuilder();
 					InputSource is = new InputSource(new StringReader(goal));
-
+					
 					try {
 						Document doc = builder.parse(is);
 						NodeList noOfGoals = doc.getElementsByTagName("value");
-
+						
 						for (int i = 0; i < noOfGoals.getLength(); ++i)
 						{
 							Element allGoals = (Element) noOfGoals.item(i);
-
-							NodeList goalScorerList = allGoals.getElementsByTagName("player1");
-							for (int k = 0; k < goalScorerList.getLength(); ++k)
-							{
-								Element gs = (Element) goalScorerList.item(k);
-								String goalScorer = gs.getFirstChild().getNodeValue();
-								System.out.println("Goal scorer is: " + goalScorer);
-								importantPlayers.add(goalScorer);
-
+							
+							NodeList goalScorerTeamList = allGoals.getElementsByTagName("team");
+							for (int j = 0; j < goalScorerTeamList.getLength(); ++j) {
+								Element gst = (Element) goalScorerTeamList.item(j);
+								String goalScorerTeam = gst.getFirstChild().getNodeValue();
+								
+								if(goalScorerTeam.equalsIgnoreCase(teamId)) {
+									
+									NodeList goalScorerList = allGoals.getElementsByTagName("player1");
+							        for (int k = 0; k < goalScorerList.getLength(); ++k)
+							        {
+							            Element gs = (Element) goalScorerList.item(k);
+							            String goalScorer = gs.getFirstChild().getNodeValue();
+							            System.out.println("Goal scorer is: " + goalScorer);
+							            importantPlayers.add(goalScorer);
+							        }
+							        NodeList assisterList = allGoals.getElementsByTagName("player2");
+							        for (int k = 0; k < assisterList.getLength(); ++k)
+							        {
+							            Element as = (Element) assisterList.item(k);
+							            String assister = as.getFirstChild().getNodeValue();
+							            System.out.println("Assister is: " + assister);
+							            importantPlayers.add(assister);
+							        }
+							        
+								}
 							}
-							NodeList assisterList = allGoals.getElementsByTagName("player2");
-							for (int k = 0; k < assisterList.getLength(); ++k)
-							{
-								Element as = (Element) assisterList.item(k);
-								String assister = as.getFirstChild().getNodeValue();
-								System.out.println("Assister is: " + assister);
-								importantPlayers.add(assister);
-							}
+					        
 						}
 					} catch (SAXException e) {
 						e.printStackTrace();
