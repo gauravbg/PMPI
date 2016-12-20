@@ -24,8 +24,6 @@ Each of these factors is based on the following individual factors:
 
 After feeding these values to the Bayesian Network, we come up with the top 5 players who are likely to score in a selected match. We then check the results of our prediction with the actual result of that match.
 
-The Bayesian Network
-
-https://cloud.githubusercontent.com/assets/13979092/21337925/9e9f8d82-c63f-11e6-9348-2aa7e4315781.png
+![Alt text](https://cloud.githubusercontent.com/assets/13979092/21337925/9e9f8d82-c63f-11e6-9348-2aa7e4315781.png "Optional title")
 
 We have tested our algorithm on the English Premier League, but this can be easily extended to any season of any league.
