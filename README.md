@@ -21,6 +21,11 @@ Each of these factors is based on the following individual factors:
   - Position of that players i.e. Goalkeeper, Defender, Midfielder or Forward
   - Form of that player in the past 5 matches by computing the number of goals, assist and shots taken by the player
   - Overall rating of that player based on his attributes
+  
+The Bayesian Network
+
+
+![Alt text](https://cloud.githubusercontent.com/assets/13979092/21337925/9e9f8d82-c63f-11e6-9348-2aa7e4315781.png "Bayesian Network")
 
 After feeding these values to the Bayesian Network, we come up with the top 5 players who are likely to score in a selected match. We then check the results of our prediction with the actual result of that match.
 
